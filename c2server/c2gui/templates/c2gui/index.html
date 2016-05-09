@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.3.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/main_page.js' %}"></script>
+    <title>C2 GUI</title>
+</head>
+
+<body>
+    <form id="coordForm">
+    {% csrf_token %}
+    Top Left Coordinates
+    <input type="text" name="topleftx" id="topleftx" value="" />
+    <input type="text" name="toplefty" id="toplefty" value="" /> <br>
+    Width
+    <input type="text" name="width" id="width" value="" /> <br>
+    Height
+    <input type="text" name="height" id="height" value="" /> <br>
+    <button id="postBtn">Submit</button>
+    </form>
+</body>
+</html>
