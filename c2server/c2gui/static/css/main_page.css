@@ -1,0 +1,15 @@
+#mapContainer {
+    position: relative;
+    width: 1000px;
+    height: 843px;
+}
+
+#map {
+    position: relative;
+    top: 0;
+    left: 0;
+}
+
+.tile {
+    float: left;
+}
