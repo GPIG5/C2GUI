@@ -29,7 +29,7 @@
             $tiles.css({
               width: width / o.x,
               height: height / o.y,
-              backgroundImage: 'url('+ $img.attr('src') + ')'
+              //backgroundImage: 'url('+ $img.attr('src') + ')'
             });
 
             // Adjust position and add id to each tile
@@ -44,11 +44,32 @@
               $(this).css('left', pos.left);
             });
 
-            $tiles.each(function() {
-              $(this).css('position', 'absolute');
+            // Receive the current status of each region
+            $.ajax({
+                url : 'get_all_regions_status',
+                data : {},
+                success: function(data) {
+                    let regionStatuses = data.statuses;
+                    for (let region of regionStatuses) {
+                        if (region.status === 'DD') {
+                            $('#region' + region.id).css({'background-color': 'yellow', 'opacity': 0.4});
+                        } else {
+                            $('#region' + region.id).css({'opacity':0});
+                        }
+                    }
+                }
             });
+
+            $tiles.each(function() {
+              $(this).css({'position' : 'absolute'});
+            });
+            $('#map').css({'display' : 'block'});
             
         });
 
     };
 }( jQuery, window ));
+
+$(document).ready(function() {
+    $('#mapContainer').sliced({x: 10, y: 8});
+});
