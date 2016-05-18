@@ -1,0 +1,34 @@
+<section class="cd-horizontal-timeline">
+        <div class="timeline">
+            <div class="events-wrapper">
+                <div class="events">
+                    <ol>
+                        {% for event in event_list %}
+                        <li><a href="#0" data-date="{{event.timestamp|date:'d/m/Y\TH:i' }}" {% if forloop.last %}class="selected"{% endif %}>{{ event.timestamp|date:'H:i' }}</a></li>
+                        {% endfor %}
+                    </ol>
+
+                    <span class="filling-line" aria-hidden="true"></span>
+                </div>
+            </div>
+
+            <ul class="cd-timeline-navigation">
+                <li><a href="#0" class="prev inactive">Prev</a></li>
+                <li><a href="#0" class="next">Next</a></li>
+            </ul>
+         </div>
+
+         <div class="events-content">
+             <ol>
+                 {% for event in event_list %}
+                   <li data-date="{{event.timestamp|date:'d/m/Y\TH:i' }}" {% if forloop.last %}class="selected"{% endif %}>
+                     <h2>{{ event.event_type }}</h2>
+                     <p>
+                       Test test
+                     </p>
+                   </li>
+                  {% endfor %}
+
+             </ol>
+          </div>
+    </section>

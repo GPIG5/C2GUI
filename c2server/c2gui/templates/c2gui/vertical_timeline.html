@@ -1,0 +1,20 @@
+{% load staticfiles %}
+<section id="cd-timeline" class="cd-container">
+  {% for event in event_list %}
+    <div class="cd-timeline-block">
+        <div class="cd-timeline-img cd-picture">
+            <img src="{% static "img/cd-icon-picture.svg" %}" alt="Picture">
+        </div> <!--cd-timeline-img -->
+
+        <div class="cd-timeline-content">
+            <h2>Title of section 1</h2>
+            <p>Lorem ipsum.</p>
+            <a href="#0" class="cd-read-more">Read more</a>
+            <span class="cd-date">{{event.timestamp|date:'d/m/Y\TH:i' }}</span>
+        </div> <!-- cd-timeline-content -->
+    </div> <!-- cd-timeline-block -->
+
+  {% endfor %}
+</section> <!--cd-timeline-content-->
+
+
