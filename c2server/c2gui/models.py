@@ -22,6 +22,7 @@ class Event(models.Model):
     )
 
     event_type = models.CharField(max_length=3, choices=EVENT_TYPES)
+    headline = models.CharField(max_length=25)
     text = models.CharField(max_length=50)
     timestamp = models.DateTimeField(auto_now_add=True)
 

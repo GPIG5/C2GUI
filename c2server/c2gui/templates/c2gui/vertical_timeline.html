@@ -1,20 +1,39 @@
 {% load staticfiles %}
-<section id="cd-timeline" class="cd-container">
-  {% for event in event_list %}
-    <div class="cd-timeline-block">
-        <div class="cd-timeline-img cd-picture">
-            <img src="{% static "img/cd-icon-picture.svg" %}" alt="Picture">
-        </div> <!--cd-timeline-img -->
+<div id="timeline"></div>
+<script src="{% static 'timeline/js/timeline.js' %}"></script>
+<script type="text/javascript">
+$(document).ready(function() {
 
-        <div class="cd-timeline-content">
-            <h2>{{ event.text }}</h2>
-            <!--<p>Lorem ipsum.</p>
-            <a href="#0" class="cd-read-more">Read more</a>-->
-            <span class="cd-date">{{event.timestamp|date:'d/m/Y\ H:i' }}</span>
-        </div> <!-- cd-timeline-content -->
-    </div> <!-- cd-timeline-block -->
+var timeline_json = {
+	"events": []
+};
+             
+var createTimeline = function () {
+    {% for event in event_list %}
+        var new_event = {
+            "start_date": {
+                "year": "{{ event.timestamp|date:'Y' }}",
+                "month": "{{ event.timestamp|date:'m' }}",
+                "day": "{{ event.timestamp|date:'d' }}",
+                "hour": "{{ event.timestamp|date:'G' }}",
+                "minute": "{{ event.timestamp|date:'i' }}",
+                "second": "",
+                "millisecond": "",
+                "format": ""
+            },
+            "text": {
+                "headline": "{{ event.headline }}",
+                "text": "{{ event.text }}"
+            }
+        }
+        timeline_json.events.push(new_event);
+    {% endfor %}
+}
 
-  {% endfor %}
-</section> <!--cd-timeline-content-->
+    createTimeline();
+    timeline = new TL.Timeline('timeline', timeline_json);
+    timeline.goToEnd();
+});
+</script>
 
 
