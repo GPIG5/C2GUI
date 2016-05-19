@@ -1,27 +1,23 @@
-import asyncio
-import json
+import simplejson
+import socket
 import struct
 
-class Communicator:
-	@asyncio.coroutine
-	def connect(self, host):
-		reader, writer = yield from asyncio.open_connection(host, 5555)
-		self.reader = reader
-		self.writer = writer
-	@asyncio.coroutine
-	def send(self, data):
-		encoded = json.dumps(data).encode('utf-8')
-		self.writer.write(struct.pack("!L", len(encoded)))
-		self.writer.write(encoded)
-	@asyncio.coroutine
-	def receive(self):
-		unencoded_size = yield from self.reader.readexactly(4)
-		encoded_size = struct.unpack("!L", unencoded_size)[0]
-		unencoded_data = yield from self.reader.readexactly(encoded_size)
-		encoded_data = json.loads(unencoded_data.decode())
-		return encoded_data
-        @asyncio.coroutine
-        def connect_and_send(self, host, data):
-            self.connect(host)
-            self.send(data)
+from .messages import DeployMesh
 
+HOST = '144.32.178.57'
+PORT = 5556
+
+class Communicator:
+    def __init__(self):
+        self.sock = socket.socket()
+        self.sock.connect((HOST, PORT))
+        print("init")
+
+    def send(self, message):
+        encoded_message = simplejson.dumps(message.to_json()).encode('UTF-8')
+        print(encoded_message)
+        self.sock.send(struct.pack("!L", len(encoded_message)))
+        self.sock.send(encoded_message)
+
+    def close(self):
+        self.sock.close()

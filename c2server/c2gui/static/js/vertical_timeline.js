@@ -1,3 +1,21 @@
+function daydiff(first, second) {
+    return Math.round((second-first));
+}
+
+function minLapse(dates) {
+    //determine the minimum distance among events
+    var dateDistances = [];
+    for (i = 1; i < dates.length; i++) {
+        var distance = dayfidd(dates[i-1], dates[i]);
+        dateDistances.push(distance);
+    }
+    return Math.min.apply(null, dateDistances);
+}
+
+function parseDate(events) {
+    var dateArrays = [];
+}
+
 jQuery(document).ready(function($){
 	var timelineBlocks = $('.cd-timeline-block'),
 		offset = 0.8;

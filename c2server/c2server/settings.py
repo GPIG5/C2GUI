@@ -31,13 +31,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    #'c2gui.apps.C2GuiConfig',
+    'c2gui',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'c2gui',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -128,4 +129,6 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
+# Celery configuration
+BROKER_URL = 'redis://localhost:6379/0'
 

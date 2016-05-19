@@ -1,10 +1,10 @@
 from decimal import Decimal
 
-MIN_X = Decimal(0.000)
-MIN_Z = Decimal(0.000)
-MAX_X = Decimal(52.596)
-MAX_Z = Decimal(62.424)
-REG_NUM_Z = 10
-REG_NUM_X = 8
-REG_WIDTH = MAX_Z / REG_NUM_Z
-REG_HEIGHT = MAX_X / REG_NUM_X
+MIN_LAT = Decimal(53.929472)
+MIN_LON = Decimal(1.004663)
+MAX_LAT = Decimal(54.007111)
+MAX_LON = Decimal(1.165084)
+REG_NUM_X = 10    # number of tiles in x axis
+REG_NUM_Y = 8     # number of tiles in y axis
+REG_WIDTH = (MAX_LON - MIN_LON) / REG_NUM_X
+REG_HEIGHT = (MAX_LAT - MIN_LAT) / REG_NUM_Y

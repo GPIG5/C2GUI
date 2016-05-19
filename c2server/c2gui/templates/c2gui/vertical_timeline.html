@@ -7,10 +7,10 @@
         </div> <!--cd-timeline-img -->
 
         <div class="cd-timeline-content">
-            <h2>Title of section 1</h2>
-            <p>Lorem ipsum.</p>
-            <a href="#0" class="cd-read-more">Read more</a>
-            <span class="cd-date">{{event.timestamp|date:'d/m/Y\TH:i' }}</span>
+            <h2>{{ event.text }}</h2>
+            <!--<p>Lorem ipsum.</p>
+            <a href="#0" class="cd-read-more">Read more</a>-->
+            <span class="cd-date">{{event.timestamp|date:'d/m/Y\ H:i' }}</span>
         </div> <!-- cd-timeline-content -->
     </div> <!-- cd-timeline-block -->
 
