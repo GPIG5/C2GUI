@@ -10,8 +10,8 @@ class SearchArea(models.Model):
         ('NE', 'Not Explored'),
     )
 
-    lat = models.DecimalField(max_digits=8, decimal_places=6)
-    lon = models.DecimalField(max_digits=8, decimal_places=6)
+    lat = models.DecimalField(max_digits=8, decimal_places=6, db_index=True)
+    lon = models.DecimalField(max_digits=8, decimal_places=6, db_index=True)
     status = models.CharField(max_length=3, choices=STATUS)
 
 class Event(models.Model):
