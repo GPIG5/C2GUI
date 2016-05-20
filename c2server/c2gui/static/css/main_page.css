@@ -22,6 +22,9 @@
     position: relative;
     top: 0;
     left: 0;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
 }
 
 #timeline-wrapper {
@@ -29,8 +32,8 @@
     margin: 0 3em;
     max-width: 600px;
     width: 100%;
-    /*max-height: 600px;
-    height: 600px;*/
+    max-height: 600px;
+    height: 500px;
 }
 
 .right-side-container {
@@ -48,6 +51,25 @@
 }
 
 .tile {
+    float: left;
+}
+
+.ghost-select {
+    display: none;
+    z-index: 9000;
+    position: absolute !important;
+    cursor: default !important;
+}
+
+.ghost-active {
+    display: block !important;
+}
+
+.ghost-select > span {
+    background-color: rgba(239, 28, 190, 0.6);
+    border: 1px solid #b20e8c;
+    width: 100%;
+    height: 100%;
     float: left;
 }
 
