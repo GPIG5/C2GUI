@@ -29,7 +29,7 @@ def send_search_coord(request):
     
     areasToSearch = SearchArea.objects.exclude(
         Q(lat__gt=toprightlat+REG_HEIGHT) | Q(lat__lt=bottomleftlat-REG_HEIGHT)
-    ).exclude(Q(lon__lt=toprightlon-REG_WIDTH) | Q(lon__gt=bottomleftlon+REG_WIDTH)
+    ).exclude(Q(lon__gt=toprightlon+REG_WIDTH) | Q(lon__lt=bottomleftlon-REG_WIDTH)
     )
     for sa in areasToSearch:
         sa.status = 'DD'
@@ -39,15 +39,20 @@ def send_search_coord(request):
     coordinates = {"bottomleft": {"latitude": bottomleftlat, "longitude": bottomleftlon},
                    "topright": {"latitude": toprightlat, "longitude": toprightlon}
     }
-    new_event = Event(event_type='IS', text='Initiated search for the area (%f N, %f W):(%f N, %f W)' % (bottomleftlat, bottomleftlon, toprightlat, toprightlon))
+    new_event = Event(event_type='IS', headline="Initiated search", text = "Iniated search for the area (%f N, %f W):(%f N, %f W)" % (bottomleftlat, -bottomleftlon, toprightlat, -toprightlon))
     new_event.save()
     bottomleft = Point(latitude=bottomleftlat, longitude=bottomleftlon, altitude=0)
     topright = Point(latitude=toprightlat, longitude=toprightlon, altitude=0)
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
-    c = Communicator()
-    c.send(mes)
+    #c = Communicator()
+    #c.send(mes)
     #send_search_area_coord.delay(coordinates)
-    return HttpResponse(simplejson.dumps({"ids": ids, "text": new_event.text, "timestamp": new_event.timestamp.strftime('%d/%m/%Y %H:%M')}), content_type='application/json')
+    return HttpResponse(simplejson.dumps({"ids": ids, "headline": new_event.headline, "text": new_event.text, "timestamp": {"year": new_event.timestamp.year,
+                              "month": new_event.timestamp.month,
+                              "day": new_event.timestamp.day,
+                              "hour": new_event.timestamp.hour,
+                              "minute": new_event.timestamp.minute}
+    }), content_type='application/json')
 
 def get_all_regions_status(request):
     data = list(SearchArea.objects.values('id', 'status'))

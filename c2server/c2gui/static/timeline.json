@@ -1,0 +1,79 @@
+{	
+	"timeline": {		"headline":"My Week", 		"type":"default",		"text":"This is a collection of my favourite things over the last week",		"date": [{
+				"startDate":"2011,12,10",
+				"endDate":"2011,12,11",
+				"headline":"Headline Goes Here",
+				"text":"<p>Body text goes here, some HTML is OK</p>",
+				"tag":"This is Optional",
+				"asset": {
+					"media":"https://twitter.com/jonginn/status/279015138542100480",
+					"thumbnail":"optional-32x32px.jpg",
+					"credit":"Credit Name Goes Here",
+					"caption":"Caption text goes here"
+				}, {
+				"startDate":"2011,12,10",
+				"endDate":"2011,12,11",
+				"headline":"Headline Goes Here",
+				"text":"<p>Body text goes here, some HTML is OK</p>",
+				"tag":"This is Optional",
+				"asset": {
+					"media":"https://twitter.com/de/status/278990020747091969",
+					"thumbnail":"optional-32x32px.jpg",
+					"credit":"Credit Name Goes Here",
+					"caption":"Caption text goes here"
+				}, {
+				"startDate":"2011,12,10",
+				"endDate":"2011,12,11",
+				"headline":"Headline Goes Here",
+				"text":"<p>Body text goes here, some HTML is OK</p>",
+				"tag":"This is Optional",
+				"asset": {
+					"media":"https://twitter.com/addyosmani/status/277850775613497345",
+					"thumbnail":"optional-32x32px.jpg",
+					"credit":"Credit Name Goes Here",
+					"caption":"Caption text goes here"
+				}, {
+				"startDate":"2011,12,10",
+				"endDate":"2011,12,11",
+				"headline":"Headline Goes Here",
+				"text":"<p>Body text goes here, some HTML is OK</p>",
+				"tag":"This is Optional",
+				"asset": {
+					"media":"https://twitter.com/todd/status/277114608282636288",
+					"thumbnail":"optional-32x32px.jpg",
+					"credit":"Credit Name Goes Here",
+					"caption":"Caption text goes here"
+				}, {
+				"startDate":"2011,12,10",
+				"endDate":"2011,12,11",
+				"headline":"Headline Goes Here",
+				"text":"<p>Body text goes here, some HTML is OK</p>",
+				"tag":"This is Optional",
+				"asset": {
+					"media":"https://twitter.com/joshlong/status/277109933240102912",
+					"thumbnail":"optional-32x32px.jpg",
+					"credit":"Credit Name Goes Here",
+					"caption":"Caption text goes here"
+				}
+			}],
+		"era": [{
+				"startDate":"2011,12,10",
+				"endDate":"2012,12,13",
+				"headline":"Headline Goes Here",
+				"tag":"This is Optional"
+			}, {
+				"startDate":"2012,12,14",
+				"endDate":"2012,12,18",
+				"headline": "head2",
+				"tag":"tag"
+			}],
+			 "chart": [
+	            {
+	                "startDate":"2011,12,10",
+	                "endDate":"2011,12,11",
+	                "headline":"Headline Goes Here",
+	                "value":"28"
+	            }
+	
+	        ]
+		}}
