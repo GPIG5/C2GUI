@@ -10,7 +10,7 @@ class Command(BaseCommand):
         for i in range(0, REG_NUM_Y):
             for j in range(0, REG_NUM_X):
                 counter = counter + 1
-                sa = SearchArea(id = counter, lat = MAX_LAT - (REG_HEIGHT*i), lon = MAX_LON - (REG_WIDTH*j), status='NE')
+                sa = SearchArea(id = counter, lat = MAX_LAT - (REG_HEIGHT*(i+1)), lon = MIN_LON + (REG_WIDTH*j), status='NE')
                 sa.save()
         
         self.stdout.write(self.style.SUCCESS('Successfully initialised the database.'))

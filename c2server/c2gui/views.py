@@ -26,15 +26,14 @@ def send_search_coord(request):
     bottomleftlon = Decimal(request.POST['bottomleftlon'])
     toprightlat = Decimal(request.POST['toprightlat'])
     toprightlon = Decimal(request.POST['toprightlon'])
-    print("started the search in the database")
+
     areasToSearch = SearchArea.objects.exclude(
-        Q(lat__gt=toprightlat+REG_HEIGHT) | Q(lat__lt=bottomleftlat-REG_HEIGHT)
-    ).exclude(Q(lon__gt=toprightlon+REG_WIDTH) | Q(lon__lt=bottomleftlon-REG_WIDTH)
+        Q(lat__gt=toprightlat) | Q(lat__lt=bottomleftlat-REG_HEIGHT)
+    ).exclude(Q(lon__gt=toprightlon) | Q(lon__lt=bottomleftlon-REG_WIDTH)
     )
     for sa in areasToSearch:
         sa.status = 'DD'
         sa.save()
-    print("finished saving areas")
     
     ids = list(areasToSearch.values('id'))
     coordinates = {"bottomleft": {"latitude": bottomleftlat, "longitude": bottomleftlon},
@@ -61,9 +60,7 @@ def get_all_regions_status(request):
 
 @csrf_exempt
 def send_drone_data(request):
-    print(request.POST)
     print(request.body)
-    print(request)
     #rec_message = request.POST["message"]
     #datatype = rec_message["data"]["datatype"]
     #if datatype == "pinor":
