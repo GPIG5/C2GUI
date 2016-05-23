@@ -31,7 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    #'c2gui.apps.C2GuiConfig',
+    'rest_framework',
     'c2gui',
     'django.contrib.admin',
     'django.contrib.auth',

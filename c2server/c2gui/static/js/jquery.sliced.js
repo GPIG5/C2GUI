@@ -1,7 +1,7 @@
 ;(function( $, window ) {
     var _defaults = {
-        x      : 10, // number of tiles in x axis
-        y      : 10, // number of tiles in y axis
+        x      : 20, // number of tiles in x axis
+        y      : 16, // number of tiles in y axis
     };
     
     $.fn.sliced = function ( options ) {
@@ -53,6 +53,8 @@
                     for (let region of regionStatuses) {
                         if (region.status === 'DD') {
                             $('#region' + region.id).css({'background-color': 'yellow', 'opacity': 0.4});
+                        } else if (region.status == 'RE') {
+                            $('#region' + region.id).css({'background-color': 'red', 'opacity': 0.5});
                         } else {
                             $('#region' + region.id).css({'opacity':0});
                         }
