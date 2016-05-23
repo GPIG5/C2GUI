@@ -44,9 +44,9 @@ def send_search_coord(request):
     bottomleft = Point(latitude=bottomleftlat, longitude=bottomleftlon, altitude=0)
     topright = Point(latitude=toprightlat, longitude=toprightlon, altitude=0)
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
-    #c = Communicator()
-    #c.send(mes)
-    #send_search_area_coord.delay(coordinates)
+    c = Communicator()
+    c.send(mes)
+    send_search_area_coord.delay(coordinates)
     return HttpResponse(simplejson.dumps({"ids": ids, "headline": new_event.headline, "text": new_event.text, "timestamp": {"year": new_event.timestamp.year,
                               "month": new_event.timestamp.month,
                               "day": new_event.timestamp.day,

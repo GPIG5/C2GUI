@@ -1,0 +1,16 @@
+{"timeline": {
+    "headline": "My Week",
+    "type": "default",
+    "text": "This is blah",
+    "startDate": "2016,04,20",
+    "date": [{"startDate":"2016,04,21",
+        "endDate": "2016,04,22",
+        "headline": "Tweet, tweet!",
+        "text":"<p>I like this tweet</p>",
+        "asset": {
+            "media": "https://twitter.com/webdesignermag/status/279240825651752961",
+            "credit": "Web Designer",
+            "caption": ""
+         }
+    }]
+}}
