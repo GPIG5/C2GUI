@@ -11,7 +11,7 @@ class Communicator:
     def __init__(self):
         self.sock = socket.socket()
         self.sock.connect((HOST, PORT))
-        print("init")
+        print("connected to environment")
 
     def send(self, message):
         encoded_message = simplejson.dumps(message.to_json()).encode('UTF-8')
