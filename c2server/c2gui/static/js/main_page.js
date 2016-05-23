@@ -1,20 +1,38 @@
 $( document ).ready(function() {
-    $(document).on('submit', '#coordForm', function()
+    var min_lat = 53.929472;
+    var max_lat = 54.007111;
+    var min_lon = -1.165084;
+    var max_lon = -1.004663;
+    var lat_range = max_lat - min_lat;
+    var lon_range = max_lon - min_lon;
+    var map_left_x = $("#map").offset().left;
+    var map_right_x = map_left_x + $("#map").width();
+    var map_top_y = $("#map").offset().top;
+    var map_bottom_y = map_top_y + $("#map").height();
+    var map_left_offset = $("#map").offset().left;
+    var map_width = $("#map").width();
+    var map_height = $("#map").height();
+
+    $('#map').on('dragstart', function(event) {event.preventDefault(); });
+    $('#map').on('mousedown', function(event) {event.preventDefault(); });
+
+    $(document).on('submit', '#coordForm', function(e)
     {
+        e.preventDefault();
+        $(".ghost-select").removeClass("ghost-active");
+        $(".ghost-select").width(0).height(0);
         var str = $(this).serialize();
         $.ajax({
 
-        type: 'POST',
-        url : 'send_search_coord',
-        data : str,
-        success : function(data) {
+          type: 'POST',
+          url : 'send_search_coord',
+          data : str,
+          success : function(data) {
              let regions = data.ids;
              for (let region of regions) {
                  $('#region' + region.id).css({'background-color': 'yellow', 'opacity': 0.4})
              };
-           }
-         });
-         var new_event = {
+             var new_event = {
                 "start_date": {
                     "year": data.timestamp.year,
                     "month": data.timestamp.month,
@@ -29,15 +47,19 @@ $( document ).ready(function() {
                     "headline": data.headline,
                     "text": data.text
                 }
-        }
-        timeline.add(new_event);
-        timeline.goToEnd();
+             };
+             timeline.add(new_event);
+             timeline.goToEnd();
+          }
+        });
+        
         var form = document.getElementById("coordForm");
         form.reset();
-        return false;
       });
 
     $("#mapContainer").mousedown(function (e) {
+        //$(".ghost-select").removeClass("ghost-active");
+        $(".ghost-select").width(0).height(0);
         $(".ghost-select").addClass("ghost-active");
         $(".ghost-select").css({
             'left': e.pageX - $("#map").offset().left,
@@ -54,7 +76,24 @@ $( document ).ready(function() {
     function selectElements(e) {
         $(document).unbind("mousemove", openSelector);
         $(document).unbind("mouseup", selectElements);
-        var maxX = 0;
+        var $selection = $(".ghost-select");
+        var height = $selection.height();
+        var width = $selection.width();
+        var left_x = $selection.offset().left;
+        var right_x = left_x + $selection.width();
+        var top_y = $selection.offset().top;
+        var bottom_y = top_y + $selection.height();
+        var bottomleftlat = max_lat - lat_range*((bottom_y - map_top_y)/map_height);
+        var bottomleftlon = min_lon + lon_range*((left_x - map_left_x)/map_width);
+        var toprightlat = max_lat - lat_range*((top_y - map_top_y)/map_height);
+        var toprightlon = min_lon + lon_range*((right_x - map_left_x)/map_width);
+        
+        document.getElementById("bottomleftlat").value = bottomleftlat;
+        document.getElementById("bottomleftlon").value = bottomleftlon;
+        document.getElementById("toprightlat").value = toprightlat;
+        document.getElementById("toprightlon").value = toprightlon;
+
+        /*var maxX = 0;
         var minX = 5000;
         var maxY = 0;
         var minY = 5000;
@@ -88,7 +127,7 @@ $( document ).ready(function() {
 
 
             }
-        });
+        });*/
         //$(".ghost-select").removeClass("ghost-active");
         //$(".ghost-select").width(0).height(0);
     }
