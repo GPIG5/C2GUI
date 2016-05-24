@@ -6,10 +6,9 @@ from django.core import serializers
 
 from .communicator import Communicator
 from .utils import *
-from .models import SearchArea, Event, Pinor, EventSerializer
+from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
-from .tasks import send_search_area_coord
-from .messages import DeployMesh, PinorMesh, MeshMessage, Message
+from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh
 from .point import Point, Space
 
 from decimal import Decimal
@@ -49,7 +48,6 @@ def send_search_coord(request):
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
     c = Communicator()
     c.send(mes)
-    send_search_area_coord.delay(coordinates)
     return HttpResponse(simplejson.dumps({"ids": ids, "headline": new_event.headline, "text": new_event.text, "timestamp": {"year": new_event.timestamp.year,
                               "month": new_event.timestamp.month,
                               "day": new_event.timestamp.day,
@@ -66,7 +64,7 @@ def get_all_regions_status(request):
 @csrf_exempt
 def send_drone_data(request):
     unicode_message = request.body.decode("utf-8")
-    print(unicode_message)
+    #print(unicode_message)
     json_message = json.loads(unicode_message)
     if json_message["data"]["datatype"] == "pinor":
         decoded_message = PinorMesh.from_json(json_message)
@@ -84,13 +82,20 @@ def send_drone_data(request):
             new_pinor.save()
             new_event = Event(event_type='POI', headline="Found a stranded person", text="Found a stranded person at %f N %f W" % (pinor.latitude, -pinor.longitude), pinor=new_pinor)
             new_event.save()
-        print(decoded_message)
-
+        #print(decoded_message)
+    if json_message["data"]["datatype"] == "status":
+        decoded_message = StatusMesh.from_json(json_message)
+        drone, created = Drone.objects.update_or_create(uid=decoded_message.uuid,
+            defaults = {"lat":decoded_message.location.latitude, "lon":decoded_message.location.longitude})
     return HttpResponse("received data")
 
-def retrieve_new_events(request):
+def retrieve_new_data(request):
     new_events = Event.objects.filter(is_new=True)
     event_serializer = EventSerializer(new_events, many=True)
     new_event_list = event_serializer.data
     new_events.update(is_new=False)
-    return HttpResponse(simplejson.dumps({"new_events": new_event_list}), content_type='application/json')
+    
+    drones = Drone.objects.all()
+    drone_serializer = DroneSerializer(drones, many=True)
+    drones_list = drone_serializer.data
+    return HttpResponse(simplejson.dumps({"new_events": new_event_list, "drones": drones_list}), content_type='application/json')

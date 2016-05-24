@@ -35,6 +35,14 @@ class Pinor(models.Model):
     lon = models.DecimalField(max_digits=8, decimal_places=6)
     region = models.ForeignKey('SearchArea', on_delete=models.CASCADE)
 
+    class Meta:
+        unique_together = ('lat', 'lon',)
+
+class Drone(models.Model):
+    uid = models.CharField(max_length=36, primary_key=True)
+    lat = models.DecimalField(max_digits=8, decimal_places=6)
+    lon = models.DecimalField(max_digits=8, decimal_places=6)
+
 ##### Custom Serializers #####
 
 class RegionSerializer(serializers.ModelSerializer):
@@ -53,3 +61,8 @@ class EventSerializer(serializers.ModelSerializer):
         model = Event
         fields = ('event_type', 'headline', 'text', 'timestamp', 'pinor')
         depth = 2
+
+class DroneSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Drone
+        fields = ('uid', 'lat', 'lon')

@@ -54,7 +54,9 @@
                         if (region.status === 'DD') {
                             $('#region' + region.id).css({'background-color': 'yellow', 'opacity': 0.4});
                         } else if (region.status == 'RE') {
-                            $('#region' + region.id).css({'background-color': 'red', 'opacity': 0.5});
+                            $('#region' + region.id).css({'background-color': 'red', 'opacity': 0.4});
+                        } else if (region.status == 'NRE'){
+                            $("#region" + region.id).css({'background-color': 'green', 'opacity': 0.4});
                         } else {
                             $('#region' + region.id).css({'opacity':0});
                         }

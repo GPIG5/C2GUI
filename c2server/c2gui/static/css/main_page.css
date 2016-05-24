@@ -74,6 +74,59 @@
     float: left;
 }
 
+.drone {
+    width: 20px;
+    height: 20px;
+}
+
+#drone-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* legend-related css */
+#legend-container {
+    position: relative;
+    clear: both;
+    top: 65px;
+    left: 300px;
+    height: 100px;
+}
+
+.legend {
+    list-style: none;
+}
+
+.legend li {
+    float: left;
+    margin-right: 10px;
+}
+
+.legend span {
+    border: 1px solid #ccc;
+    float: left;
+    width: 17px;
+    height: 17px;
+    margin: 2px;
+}
+
+.legend .inprogress {
+    background-color: yellow;
+}
+
+.legend .rescueneeded {
+    background-color: red;
+}
+
+.legend .norescueneeded {
+    background-color: green;
+}
+
+.legend .notexplored {
+    background-image: url("/static/img/transparency.png");
+}
+
 *, *::after, *::before {
   box-sizing: border-box;
 }
