@@ -16,6 +16,49 @@ $( document ).ready(function() {
     $('#map').on('dragstart', function(event) {event.preventDefault(); });
     $('#map').on('mousedown', function(event) {event.preventDefault(); });
 
+    (function periodic_worker() {
+      $.ajax({
+        url: 'retrieve_new_events',
+        success: function(data) {
+          console.log(data);
+          let new_events = data.new_events;
+          for (let new_event of new_events) {
+              event_date = new Date(new_event.timestamp);
+              var ev = {
+                  "start_date": {
+                      "year": event_date.getUTCFullYear(),
+                      "month": event_date.getUTCMonth() + 1,
+                      "day": event_date.getUTCDate(),
+                      "hour": event_date.getUTCHours(),
+                      "minute": event_date.getUTCMinutes(),
+                      "second": event_date.getUTCSeconds(),
+                      "millisecond": "",
+                      "format": ""
+                  },
+                  "text": {
+                      "headline": new_event.headline,
+                      "text": new_event.text
+                  }
+              };
+              console.log(ev);
+              timeline.add(ev);
+              if (new_event.region) {
+                  if (new_event.region_status === "RE"){
+                      $("#region" + new_event.region).css({"background-color": "red", "opacity": 0.4});
+                  } else if (new_event.region_status === "DD"){
+                      $("#region" + new_event.region).css({"background-color": "yellow", "opacity": 0.4});
+                  }
+              }
+          }
+          timeline.goToEnd();
+        },
+        complete: function() {
+          // Schedule the next request when the current one is complete
+          setTimeout(periodic_worker, 15000);    
+        }
+      });
+    })();
+
     $(document).on('submit', '#coordForm', function(e)
     {
         e.preventDefault();
@@ -39,7 +82,7 @@ $( document ).ready(function() {
                     "day": data.timestamp.day,
                     "hour": data.timestamp.hour,
                     "minute": data.timestamp.minute,
-                    "second": "",
+                    "second": data.timestamp.second,
                     "millisecond": "",
                     "format": ""
                 },
@@ -58,7 +101,6 @@ $( document ).ready(function() {
       });
 
     $("#mapContainer").mousedown(function (e) {
-        //$(".ghost-select").removeClass("ghost-active");
         $(".ghost-select").width(0).height(0);
         $(".ghost-select").addClass("ghost-active");
         $(".ghost-select").css({
@@ -93,43 +135,6 @@ $( document ).ready(function() {
         document.getElementById("toprightlat").value = toprightlat;
         document.getElementById("toprightlon").value = toprightlon;
 
-        /*var maxX = 0;
-        var minX = 5000;
-        var maxY = 0;
-        var minY = 5000;
-        var elementArr = new Array();
-        $(".tile").each(function () {
-            var aElem = $(".ghost-select");
-            var bElem = $(this);
-            var result = doObjectsCollide(aElem, bElem);
-
-            if (result == true) {
-                var aElemPos = bElem.offset();
-                var bElemPos = bElem.offset();
-                var aW = bElem.width();
-                var aH = bElem.height();
-                var bW = bElem.width();
-                var bH = bElem.height();
-
-                var coords = checkMaxMinPos(aElemPos, bElemPos, aW, aH, bW, bH, maxX, minX, maxY, minY);
-                maxX = coords.maxX;
-                minX = coords.minX;
-                maxY = coords.maxY;
-                minY = coords.minY;
-                var parent = bElem.parent();
-
-               if (bElem.css("left") === "auto" && bElem.css("top") === "auto") {
-                   bElem.css({
-                       'left': parent.css('left'),
-                       'top': parent.css('top')
-                   });
-               }
-
-
-            }
-        });*/
-        //$(".ghost-select").removeClass("ghost-active");
-        //$(".ghost-select").width(0).height(0);
     }
 
     function doObjectsCollide(a, b) {
