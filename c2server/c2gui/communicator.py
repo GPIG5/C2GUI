@@ -4,7 +4,7 @@ import struct
 
 from .messages import DeployMesh
 
-HOST = '144.32.178.57'
+HOST = '144.32.178.54'
 PORT = 5556
 
 class Communicator:
@@ -18,6 +18,7 @@ class Communicator:
         print(encoded_message)
         self.sock.send(struct.pack("!L", len(encoded_message)))
         self.sock.send(encoded_message)
+        print("sent a message")
 
     def close(self):
         self.sock.close()
