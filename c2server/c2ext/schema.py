@@ -25,7 +25,6 @@ import datetime as datetime_
 import warnings as warnings_
 from lxml import etree as etree_
 
-
 Validate_simpletypes_ = True
 if sys.version_info.major == 2:
     BaseStrType_ = basestring
@@ -41,6 +40,7 @@ def parsexml_(infile, parser=None, **kwargs):
     doc = etree_.parse(infile, parser=parser, **kwargs)
     return doc
 
+
 #
 # User methods
 #
@@ -54,33 +54,45 @@ except ImportError as exp:
 
     class GeneratedsSuper(object):
         tzoff_pattern = re_.compile(r'(\+|-)((0\d|1[0-3]):[0-5]\d|14:00)$')
+
         class _FixedOffsetTZ(datetime_.tzinfo):
             def __init__(self, offset, name):
                 self.__offset = datetime_.timedelta(minutes=offset)
                 self.__name = name
+
             def utcoffset(self, dt):
                 return self.__offset
+
             def tzname(self, dt):
                 return self.__name
+
             def dst(self, dt):
                 return None
+
         def gds_format_string(self, input_data, input_name=''):
             return input_data
+
         def gds_validate_string(self, input_data, node=None, input_name=''):
             if not input_data:
                 return ''
             else:
                 return input_data
+
         def gds_format_base64(self, input_data, input_name=''):
             return base64.b64encode(input_data)
+
         def gds_validate_base64(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_integer(self, input_data, input_name=''):
             return '%d' % input_data
+
         def gds_validate_integer(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_integer_list(self, input_data, input_name=''):
             return '%s' % ' '.join(input_data)
+
         def gds_validate_integer_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
@@ -90,12 +102,16 @@ except ImportError as exp:
                 except (TypeError, ValueError):
                     raise_parse_error(node, 'Requires sequence of integers')
             return values
+
         def gds_format_float(self, input_data, input_name=''):
             return ('%.15f' % input_data).rstrip('0')
+
         def gds_validate_float(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_float_list(self, input_data, input_name=''):
             return '%s' % ' '.join(input_data)
+
         def gds_validate_float_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
@@ -105,12 +121,16 @@ except ImportError as exp:
                 except (TypeError, ValueError):
                     raise_parse_error(node, 'Requires sequence of floats')
             return values
+
         def gds_format_double(self, input_data, input_name=''):
             return '%e' % input_data
+
         def gds_validate_double(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_double_list(self, input_data, input_name=''):
             return '%s' % ' '.join(input_data)
+
         def gds_validate_double_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
@@ -120,24 +140,30 @@ except ImportError as exp:
                 except (TypeError, ValueError):
                     raise_parse_error(node, 'Requires sequence of doubles')
             return values
+
         def gds_format_boolean(self, input_data, input_name=''):
             return ('%s' % input_data).lower()
+
         def gds_validate_boolean(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_boolean_list(self, input_data, input_name=''):
             return '%s' % ' '.join(input_data)
+
         def gds_validate_boolean_list(
                 self, input_data, node=None, input_name=''):
             values = input_data.split()
             for value in values:
-                if value not in ('true', '1', 'false', '0', ):
+                if value not in ('true', '1', 'false', '0',):
                     raise_parse_error(
                         node,
                         'Requires sequence of booleans '
                         '("true", "1", "false", "0")')
             return values
+
         def gds_validate_datetime(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_datetime(self, input_data, input_name=''):
             if input_data.microsecond == 0:
                 _svalue = '%04d-%02d-%02dT%02d:%02d:%02d' % (
@@ -174,6 +200,7 @@ except ImportError as exp:
                         minutes = (total_seconds - (hours * 3600)) // 60
                         _svalue += '{0:02d}:{1:02d}'.format(hours, minutes)
             return _svalue
+
         @classmethod
         def gds_parse_datetime(cls, input_data):
             tz = None
@@ -193,7 +220,7 @@ except ImportError as exp:
             time_parts = input_data.split('.')
             if len(time_parts) > 1:
                 micro_seconds = int(float('0.' + time_parts[1]) * 1000000)
-                input_data = '%s.%s' % (time_parts[0], micro_seconds, )
+                input_data = '%s.%s' % (time_parts[0], micro_seconds,)
                 dt = datetime_.datetime.strptime(
                     input_data, '%Y-%m-%dT%H:%M:%S.%f')
             else:
@@ -201,8 +228,10 @@ except ImportError as exp:
                     input_data, '%Y-%m-%dT%H:%M:%S')
             dt = dt.replace(tzinfo=tz)
             return dt
+
         def gds_validate_date(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_date(self, input_data, input_name=''):
             _svalue = '%04d-%02d-%02d' % (
                 input_data.year,
@@ -229,6 +258,7 @@ except ImportError as exp:
             except AttributeError:
                 pass
             return _svalue
+
         @classmethod
         def gds_parse_date(cls, input_data):
             tz = None
@@ -248,8 +278,10 @@ except ImportError as exp:
             dt = datetime_.datetime.strptime(input_data, '%Y-%m-%d')
             dt = dt.replace(tzinfo=tz)
             return dt.date()
+
         def gds_validate_time(self, input_data, node=None, input_name=''):
             return input_data
+
         def gds_format_time(self, input_data, input_name=''):
             if input_data.microsecond == 0:
                 _svalue = '%02d:%02d:%02d' % (
@@ -280,6 +312,7 @@ except ImportError as exp:
                         minutes = (total_seconds - (hours * 3600)) // 60
                         _svalue += '{0:02d}:{1:02d}'.format(hours, minutes)
             return _svalue
+
         def gds_validate_simple_patterns(self, patterns, target):
             # pat is a list of lists of strings/patterns.  We should:
             # - AND the outer elements
@@ -295,6 +328,7 @@ except ImportError as exp:
                     found1 = False
                     break
             return found1
+
         @classmethod
         def gds_parse_time(cls, input_data):
             tz = None
@@ -317,15 +351,19 @@ except ImportError as exp:
                 dt = datetime_.datetime.strptime(input_data, '%H:%M:%S')
             dt = dt.replace(tzinfo=tz)
             return dt.time()
+
         def gds_str_lower(self, instring):
             return instring.lower()
+
         def get_path_(self, node):
             path_list = []
             self.get_path_list_(node, path_list)
             path_list.reverse()
             path = '/'.join(path_list)
             return path
+
         Tag_strip_pattern_ = re_.compile(r'\{.*\}')
+
         def get_path_list_(self, node, path_list):
             if node is None:
                 return
@@ -333,6 +371,7 @@ except ImportError as exp:
             if tag:
                 path_list.append(tag)
             self.get_path_list_(node.getparent(), path_list)
+
         def get_class_obj_(self, node, default_class=None):
             class_obj1 = default_class
             if 'xsi' in node.nsmap:
@@ -345,17 +384,21 @@ except ImportError as exp:
                     if class_obj2 is not None:
                         class_obj1 = class_obj2
             return class_obj1
+
         def gds_build_any(self, node, type_name=None):
             return None
+
         @classmethod
         def gds_reverse_node_mapping(cls, mapping):
             return dict(((v, k) for k, v in mapping.iteritems()))
+
         @staticmethod
         def gds_encode(instring):
             if sys.version_info.major == 2:
                 return instring.encode(ExternalEncoding)
             else:
                 return instring
+
 
     def getSubclassFromModule_(module, class_):
         '''Get the subclass of a class from a specific module.'''
@@ -364,7 +407,6 @@ except ImportError as exp:
             return getattr(module, name)
         else:
             return None
-
 
 #
 # If you have installed IPython you can uncomment and use the following.
@@ -394,6 +436,7 @@ CDATA_pattern_ = re_.compile(r"<!\[CDATA\[.*?\]\]>", re_.DOTALL)
 # Change this to redirect the generated superclass module to use a
 # specific subclass module.
 CurrentSubclassModule_ = None
+
 
 #
 # Support/utility functions.
@@ -483,7 +526,7 @@ def find_attr_value_(attr_name, node):
         prefix, name = attr_parts
         namespace = node.nsmap.get(prefix)
         if namespace is not None:
-            value = attrs.get('{%s}%s' % (namespace, name, ))
+            value = attrs.get('{%s}%s' % (namespace, name,))
     return value
 
 
@@ -492,7 +535,7 @@ class GDSParseError(Exception):
 
 
 def raise_parse_error(node, msg):
-    msg = '%s (element %s/line %d)' % (msg, node.tag, node.sourceline, )
+    msg = '%s (element %s/line %d)' % (msg, node.tag, node.sourceline,)
     raise GDSParseError(msg)
 
 
@@ -512,19 +555,25 @@ class MixedContainer:
     TypeDouble = 6
     TypeBoolean = 7
     TypeBase64 = 8
+
     def __init__(self, category, content_type, name, value):
         self.category = category
         self.content_type = content_type
         self.name = name
         self.value = value
+
     def getCategory(self):
         return self.category
+
     def getContenttype(self, content_type):
         return self.content_type
+
     def getValue(self):
         return self.value
+
     def getName(self):
         return self.name
+
     def export(self, outfile, level, name, namespace, pretty_print=True):
         if self.category == MixedContainer.CategoryText:
             # Prevent exporting empty content as empty lines.
@@ -532,18 +581,19 @@ class MixedContainer:
                 outfile.write(self.value)
         elif self.category == MixedContainer.CategorySimple:
             self.exportSimple(outfile, level, name)
-        else:    # category == MixedContainer.CategoryComplex
+        else:  # category == MixedContainer.CategoryComplex
             self.value.export(outfile, level, namespace, name, pretty_print)
+
     def exportSimple(self, outfile, level, name):
         if self.content_type == MixedContainer.TypeString:
             outfile.write('<%s>%s</%s>' % (
                 self.name, self.value, self.name))
         elif self.content_type == MixedContainer.TypeInteger or \
-                self.content_type == MixedContainer.TypeBoolean:
+                        self.content_type == MixedContainer.TypeBoolean:
             outfile.write('<%s>%d</%s>' % (
                 self.name, self.value, self.name))
         elif self.content_type == MixedContainer.TypeFloat or \
-                self.content_type == MixedContainer.TypeDecimal:
+                        self.content_type == MixedContainer.TypeDecimal:
             outfile.write('<%s>%f</%s>' % (
                 self.name, self.value, self.name))
         elif self.content_type == MixedContainer.TypeDouble:
@@ -552,6 +602,7 @@ class MixedContainer:
         elif self.content_type == MixedContainer.TypeBase64:
             outfile.write('<%s>%s</%s>' % (
                 self.name, base64.b64encode(self.value), self.name))
+
     def to_etree(self, element):
         if self.category == MixedContainer.CategoryText:
             # Prevent exporting empty content as empty lines.
@@ -569,22 +620,24 @@ class MixedContainer:
         elif self.category == MixedContainer.CategorySimple:
             subelement = etree_.SubElement(element, '%s' % self.name)
             subelement.text = self.to_etree_simple()
-        else:    # category == MixedContainer.CategoryComplex
+        else:  # category == MixedContainer.CategoryComplex
             self.value.to_etree(element)
+
     def to_etree_simple(self):
         if self.content_type == MixedContainer.TypeString:
             text = self.value
         elif (self.content_type == MixedContainer.TypeInteger or
-                self.content_type == MixedContainer.TypeBoolean):
+                      self.content_type == MixedContainer.TypeBoolean):
             text = '%d' % self.value
         elif (self.content_type == MixedContainer.TypeFloat or
-                self.content_type == MixedContainer.TypeDecimal):
+                      self.content_type == MixedContainer.TypeDecimal):
             text = '%f' % self.value
         elif self.content_type == MixedContainer.TypeDouble:
             text = '%g' % self.value
         elif self.content_type == MixedContainer.TypeBase64:
             text = '%s' % base64.b64encode(self.value)
         return text
+
     def exportLiteral(self, outfile, level, name):
         if self.category == MixedContainer.CategoryText:
             showIndent(outfile, level)
@@ -596,7 +649,7 @@ class MixedContainer:
             outfile.write(
                 'model_.MixedContainer(%d, %d, "%s", "%s"),\n' % (
                     self.category, self.content_type, self.name, self.value))
-        else:    # category == MixedContainer.CategoryComplex
+        else:  # category == MixedContainer.CategoryComplex
             showIndent(outfile, level)
             outfile.write(
                 'model_.MixedContainer(%d, %d, "%s",\n' % (
@@ -611,10 +664,19 @@ class MemberSpec_(object):
         self.name = name
         self.data_type = data_type
         self.container = container
-    def set_name(self, name): self.name = name
-    def get_name(self): return self.name
-    def set_data_type(self, data_type): self.data_type = data_type
-    def get_data_type_chain(self): return self.data_type
+
+    def set_name(self, name):
+        self.name = name
+
+    def get_name(self):
+        return self.name
+
+    def set_data_type(self, data_type):
+        self.data_type = data_type
+
+    def get_data_type_chain(self):
+        return self.data_type
+
     def get_data_type(self):
         if isinstance(self.data_type, list):
             if len(self.data_type) > 0:
@@ -623,14 +685,19 @@ class MemberSpec_(object):
                 return 'xs:string'
         else:
             return self.data_type
-    def set_container(self, container): self.container = container
-    def get_container(self): return self.container
+
+    def set_container(self, container):
+        self.container = container
+
+    def get_container(self):
+        return self.container
 
 
 def _cast(typ, value):
     if typ is None or value is None:
         return value
     return typ(value)
+
 
 #
 # Data representation classes.
@@ -640,12 +707,14 @@ def _cast(typ, value):
 class gpigData(GeneratedsSuper):
     subclass = None
     superclass = None
+
     def __init__(self, gisposition=None):
         self.original_tagname_ = None
         if gisposition is None:
             self.gisposition = []
         else:
             self.gisposition = gisposition
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -656,19 +725,32 @@ class gpigData(GeneratedsSuper):
             return gpigData.subclass(*args_, **kwargs_)
         else:
             return gpigData(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_gisposition(self): return self.gisposition
-    def set_gisposition(self, gisposition): self.gisposition = gisposition
-    def add_gisposition(self, value): self.gisposition.append(value)
-    def insert_gisposition_at(self, index, value): self.gisposition.insert(index, value)
-    def replace_gisposition_at(self, index, value): self.gisposition[index] = value
+
+    def get_gisposition(self):
+        return self.gisposition
+
+    def set_gisposition(self, gisposition):
+        self.gisposition = gisposition
+
+    def add_gisposition(self, value):
+        self.gisposition.append(value)
+
+    def insert_gisposition_at(self, index, value):
+        self.gisposition.insert(index, value)
+
+    def replace_gisposition_at(self, index, value):
+        self.gisposition[index] = value
+
     def hasContent_(self):
         if (
-            self.gisposition
+                self.gisposition
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='gpigData', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -677,18 +759,20 @@ class gpigData(GeneratedsSuper):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='gpigData')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='gpigData', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='gpigData'):
         pass
+
     def exportChildren(self, outfile, level, namespace_='', name_='gpigData', fromsubclass_=False, pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -696,6 +780,7 @@ class gpigData(GeneratedsSuper):
             eol_ = ''
         for gisposition_ in self.gisposition:
             gisposition_.export(outfile, level, namespace_, name_='gisposition', pretty_print=pretty_print)
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -703,25 +788,31 @@ class gpigData(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         pass
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'gisposition':
             obj_ = gisPosition.factory()
             obj_.build(child_)
             self.gisposition.append(obj_)
             obj_.original_tagname_ = 'gisposition'
+
+
 # end class gpigData
 
 
 class gisPosition(GeneratedsSuper):
     subclass = None
     superclass = None
+
     def __init__(self, position=None, timestamp=None, value=None):
         self.original_tagname_ = None
         self.position = position
         self.timestamp = timestamp
         self.value = value
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -732,22 +823,37 @@ class gisPosition(GeneratedsSuper):
             return gisPosition.subclass(*args_, **kwargs_)
         else:
             return gisPosition(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_position(self): return self.position
-    def set_position(self, position): self.position = position
-    def get_timestamp(self): return self.timestamp
-    def set_timestamp(self, timestamp): self.timestamp = timestamp
-    def get_value(self): return self.value
-    def set_value(self, value): self.value = value
+
+    def get_position(self):
+        return self.position
+
+    def set_position(self, position):
+        self.position = position
+
+    def get_timestamp(self):
+        return self.timestamp
+
+    def set_timestamp(self, timestamp):
+        self.timestamp = timestamp
+
+    def get_value(self):
+        return self.value
+
+    def set_value(self, value):
+        self.value = value
+
     def hasContent_(self):
         if (
-            self.position is not None or
-            self.timestamp is not None or
-            self.value is not None
+                            self.position is not None or
+                            self.timestamp is not None or
+                        self.value is not None
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='gisPosition', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -756,19 +862,22 @@ class gisPosition(GeneratedsSuper):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='gisPosition')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='gisPosition', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='gisPosition'):
         pass
-    def exportChildren(self, outfile, level, namespace_='', name_='gisPosition', fromsubclass_=False, pretty_print=True):
+
+    def exportChildren(self, outfile, level, namespace_='', name_='gisPosition', fromsubclass_=False,
+                       pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -779,6 +888,7 @@ class gisPosition(GeneratedsSuper):
             self.timestamp.export(outfile, level, namespace_, name_='timestamp', pretty_print=pretty_print)
         if self.value is not None:
             self.value.export(outfile, level, namespace_, name_='value', pretty_print=pretty_print)
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -786,8 +896,10 @@ class gisPosition(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         pass
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'position':
             class_obj_ = self.get_class_obj_(child_, position)
@@ -806,15 +918,19 @@ class gisPosition(GeneratedsSuper):
             obj_.build(child_)
             self.value = obj_
             obj_.original_tagname_ = 'value'
+
+
 # end class gisPosition
 
 
 class position(GeneratedsSuper):
     subclass = None
     superclass = None
+
     def __init__(self, extensiontype_=None):
         self.original_tagname_ = None
         self.extensiontype_ = extensiontype_
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -825,9 +941,15 @@ class position(GeneratedsSuper):
             return position.subclass(*args_, **kwargs_)
         else:
             return position(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_extensiontype_(self): return self.extensiontype_
-    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
+
+    def get_extensiontype_(self):
+        return self.extensiontype_
+
+    def set_extensiontype_(self, extensiontype_):
+        self.extensiontype_ = extensiontype_
+
     def hasContent_(self):
         if (
 
@@ -835,6 +957,7 @@ class position(GeneratedsSuper):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='position', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -843,23 +966,26 @@ class position(GeneratedsSuper):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='position')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='position', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='position'):
         if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
             already_processed.add('xsi:type')
             outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
             outfile.write(' xsi:type="%s"' % self.extensiontype_)
         pass
+
     def exportChildren(self, outfile, level, namespace_='', name_='position', fromsubclass_=False, pretty_print=True):
         pass
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -867,23 +993,29 @@ class position(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         value = find_attr_value_('xsi:type', node)
         if value is not None and 'xsi:type' not in already_processed:
             already_processed.add('xsi:type')
             self.extensiontype_ = value
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
+
+
 # end class position
 
 
 class point(position):
     subclass = None
     superclass = position
+
     def __init__(self, position=None):
         self.original_tagname_ = None
         super(point, self).__init__()
         self.position = position
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -894,17 +1026,24 @@ class point(position):
             return point.subclass(*args_, **kwargs_)
         else:
             return point(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_position(self): return self.position
-    def set_position(self, position): self.position = position
+
+    def get_position(self):
+        return self.position
+
+    def set_position(self, position):
+        self.position = position
+
     def hasContent_(self):
         if (
-            self.position is not None or
-            super(point, self).hasContent_()
+                        self.position is not None or
+                    super(point, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='point', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -913,18 +1052,20 @@ class point(position):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='point')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='point', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='point'):
         super(point, self).exportAttributes(outfile, level, already_processed, namespace_, name_='point')
+
     def exportChildren(self, outfile, level, namespace_='', name_='point', fromsubclass_=False, pretty_print=True):
         super(point, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
@@ -933,6 +1074,7 @@ class point(position):
             eol_ = ''
         if self.position is not None:
             self.position.export(outfile, level, namespace_, name_='position', pretty_print=pretty_print)
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -940,8 +1082,10 @@ class point(position):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(point, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'position':
             obj_ = coord.factory()
@@ -949,16 +1093,20 @@ class point(position):
             self.position = obj_
             obj_.original_tagname_ = 'position'
         super(point, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class point
 
 
 class coord(GeneratedsSuper):
     subclass = None
     superclass = None
+
     def __init__(self, latitude=None, longitude=None):
         self.original_tagname_ = None
         self.latitude = _cast(float, latitude)
         self.longitude = _cast(float, longitude)
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -969,11 +1117,21 @@ class coord(GeneratedsSuper):
             return coord.subclass(*args_, **kwargs_)
         else:
             return coord(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_latitude(self): return self.latitude
-    def set_latitude(self, latitude): self.latitude = latitude
-    def get_longitude(self): return self.longitude
-    def set_longitude(self, longitude): self.longitude = longitude
+
+    def get_latitude(self):
+        return self.latitude
+
+    def set_latitude(self, latitude):
+        self.latitude = latitude
+
+    def get_longitude(self):
+        return self.longitude
+
+    def set_longitude(self, longitude):
+        self.longitude = longitude
+
     def hasContent_(self):
         if (
 
@@ -981,6 +1139,7 @@ class coord(GeneratedsSuper):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='coord', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -989,15 +1148,16 @@ class coord(GeneratedsSuper):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='coord')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='coord', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='coord'):
         if self.latitude is not None and 'latitude' not in already_processed:
             already_processed.add('latitude')
@@ -1005,8 +1165,10 @@ class coord(GeneratedsSuper):
         if self.longitude is not None and 'longitude' not in already_processed:
             already_processed.add('longitude')
             outfile.write(' longitude="%s"' % self.gds_format_float(self.longitude, input_name='longitude'))
+
     def exportChildren(self, outfile, level, namespace_='', name_='coord', fromsubclass_=False, pretty_print=True):
         pass
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1014,6 +1176,7 @@ class coord(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         value = find_attr_value_('latitude', node)
         if value is not None and 'latitude' not in already_processed:
@@ -1029,19 +1192,24 @@ class coord(GeneratedsSuper):
                 self.longitude = float(value)
             except ValueError as exp:
                 raise ValueError('Bad float/double attribute (longitude): %s' % exp)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
+
+
 # end class coord
 
 
 class boundingBox(position):
     subclass = None
     superclass = position
+
     def __init__(self, topleft=None, topright=None):
         self.original_tagname_ = None
         super(boundingBox, self).__init__()
         self.topleft = topleft
         self.topright = topright
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1052,20 +1220,31 @@ class boundingBox(position):
             return boundingBox.subclass(*args_, **kwargs_)
         else:
             return boundingBox(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_topleft(self): return self.topleft
-    def set_topleft(self, topleft): self.topleft = topleft
-    def get_topright(self): return self.topright
-    def set_topright(self, topright): self.topright = topright
+
+    def get_topleft(self):
+        return self.topleft
+
+    def set_topleft(self, topleft):
+        self.topleft = topleft
+
+    def get_topright(self):
+        return self.topright
+
+    def set_topright(self, topright):
+        self.topright = topright
+
     def hasContent_(self):
         if (
-            self.topleft is not None or
-            self.topright is not None or
-            super(boundingBox, self).hasContent_()
+                            self.topleft is not None or
+                            self.topright is not None or
+                    super(boundingBox, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='boundingBox', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1074,19 +1253,22 @@ class boundingBox(position):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='boundingBox')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='boundingBox', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='boundingBox'):
         super(boundingBox, self).exportAttributes(outfile, level, already_processed, namespace_, name_='boundingBox')
-    def exportChildren(self, outfile, level, namespace_='', name_='boundingBox', fromsubclass_=False, pretty_print=True):
+
+    def exportChildren(self, outfile, level, namespace_='', name_='boundingBox', fromsubclass_=False,
+                       pretty_print=True):
         super(boundingBox, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
@@ -1096,6 +1278,7 @@ class boundingBox(position):
             self.topleft.export(outfile, level, namespace_, name_='topleft', pretty_print=pretty_print)
         if self.topright is not None:
             self.topright.export(outfile, level, namespace_, name_='topright', pretty_print=pretty_print)
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1103,8 +1286,10 @@ class boundingBox(position):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(boundingBox, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'topleft':
             obj_ = coord.factory()
@@ -1117,17 +1302,21 @@ class boundingBox(position):
             self.topright = obj_
             obj_.original_tagname_ = 'topright'
         super(boundingBox, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class boundingBox
 
 
 class polar(position):
     subclass = None
     superclass = position
+
     def __init__(self, point=None, radius=None):
         self.original_tagname_ = None
         super(polar, self).__init__()
         self.point = point
         self.radius = radius
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1138,20 +1327,31 @@ class polar(position):
             return polar.subclass(*args_, **kwargs_)
         else:
             return polar(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_point(self): return self.point
-    def set_point(self, point): self.point = point
-    def get_radius(self): return self.radius
-    def set_radius(self, radius): self.radius = radius
+
+    def get_point(self):
+        return self.point
+
+    def set_point(self, point):
+        self.point = point
+
+    def get_radius(self):
+        return self.radius
+
+    def set_radius(self, radius):
+        self.radius = radius
+
     def hasContent_(self):
         if (
-            self.point is not None or
-            self.radius is not None or
-            super(polar, self).hasContent_()
+                            self.point is not None or
+                            self.radius is not None or
+                    super(polar, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='polar', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1160,18 +1360,20 @@ class polar(position):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='polar')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='polar', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='polar'):
         super(polar, self).exportAttributes(outfile, level, already_processed, namespace_, name_='polar')
+
     def exportChildren(self, outfile, level, namespace_='', name_='polar', fromsubclass_=False, pretty_print=True):
         super(polar, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
@@ -1182,7 +1384,9 @@ class polar(position):
             self.point.export(outfile, level, namespace_, name_='point', pretty_print=pretty_print)
         if self.radius is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sradius>%s</%sradius>%s' % (namespace_, self.gds_format_float(self.radius, input_name='radius'), namespace_, eol_))
+            outfile.write('<%sradius>%s</%sradius>%s' % (
+                namespace_, self.gds_format_float(self.radius, input_name='radius'), namespace_, eol_))
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1190,8 +1394,10 @@ class polar(position):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(polar, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'point':
             obj_ = coord.factory()
@@ -1207,12 +1413,15 @@ class polar(position):
             fval_ = self.gds_validate_float(fval_, node, 'radius')
             self.radius = fval_
         super(polar, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class polar
 
 
 class poly(position):
     subclass = None
     superclass = position
+
     def __init__(self, coords=None):
         self.original_tagname_ = None
         super(poly, self).__init__()
@@ -1220,6 +1429,7 @@ class poly(position):
             self.coords = []
         else:
             self.coords = coords
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1230,20 +1440,33 @@ class poly(position):
             return poly.subclass(*args_, **kwargs_)
         else:
             return poly(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_coords(self): return self.coords
-    def set_coords(self, coords): self.coords = coords
-    def add_coords(self, value): self.coords.append(value)
-    def insert_coords_at(self, index, value): self.coords.insert(index, value)
-    def replace_coords_at(self, index, value): self.coords[index] = value
+
+    def get_coords(self):
+        return self.coords
+
+    def set_coords(self, coords):
+        self.coords = coords
+
+    def add_coords(self, value):
+        self.coords.append(value)
+
+    def insert_coords_at(self, index, value):
+        self.coords.insert(index, value)
+
+    def replace_coords_at(self, index, value):
+        self.coords[index] = value
+
     def hasContent_(self):
         if (
-            self.coords or
-            super(poly, self).hasContent_()
+                    self.coords or
+                    super(poly, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='poly', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1252,18 +1475,20 @@ class poly(position):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='poly')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='poly', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='poly'):
         super(poly, self).exportAttributes(outfile, level, already_processed, namespace_, name_='poly')
+
     def exportChildren(self, outfile, level, namespace_='', name_='poly', fromsubclass_=False, pretty_print=True):
         super(poly, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
@@ -1272,6 +1497,7 @@ class poly(position):
             eol_ = ''
         for coords_ in self.coords:
             coords_.export(outfile, level, namespace_, name_='coords', pretty_print=pretty_print)
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1279,8 +1505,10 @@ class poly(position):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(poly, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'coords':
             obj_ = coord.factory()
@@ -1288,12 +1516,15 @@ class poly(position):
             self.coords.append(obj_)
             obj_.original_tagname_ = 'coords'
         super(poly, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class poly
 
 
 class timestamp(GeneratedsSuper):
     subclass = None
     superclass = None
+
     def __init__(self, date=None):
         self.original_tagname_ = None
         if isinstance(date, BaseStrType_):
@@ -1301,6 +1532,7 @@ class timestamp(GeneratedsSuper):
         else:
             initvalue_ = date
         self.date = initvalue_
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1311,9 +1543,15 @@ class timestamp(GeneratedsSuper):
             return timestamp.subclass(*args_, **kwargs_)
         else:
             return timestamp(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_date(self): return self.date
-    def set_date(self, date): self.date = date
+
+    def get_date(self):
+        return self.date
+
+    def set_date(self, date):
+        self.date = date
+
     def hasContent_(self):
         if (
 
@@ -1321,6 +1559,7 @@ class timestamp(GeneratedsSuper):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='timestamp', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1329,21 +1568,24 @@ class timestamp(GeneratedsSuper):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='timestamp')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='timestamp', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='timestamp'):
         if self.date is not None and 'date' not in already_processed:
             already_processed.add('date')
             outfile.write(' date="%s"' % self.gds_format_datetime(self.date, input_name='date'))
+
     def exportChildren(self, outfile, level, namespace_='', name_='timestamp', fromsubclass_=False, pretty_print=True):
         pass
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1351,6 +1593,7 @@ class timestamp(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         value = find_attr_value_('date', node)
         if value is not None and 'date' not in already_processed:
@@ -1359,17 +1602,22 @@ class timestamp(GeneratedsSuper):
                 self.date = self.gds_parse_datetime(value)
             except ValueError as exp:
                 raise ValueError('Bad date-time attribute (date): %s' % exp)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
+
+
 # end class timestamp
 
 
 class dataType(GeneratedsSuper):
     subclass = None
     superclass = None
+
     def __init__(self, extensiontype_=None):
         self.original_tagname_ = None
         self.extensiontype_ = extensiontype_
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1380,9 +1628,15 @@ class dataType(GeneratedsSuper):
             return dataType.subclass(*args_, **kwargs_)
         else:
             return dataType(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_extensiontype_(self): return self.extensiontype_
-    def set_extensiontype_(self, extensiontype_): self.extensiontype_ = extensiontype_
+
+    def get_extensiontype_(self):
+        return self.extensiontype_
+
+    def set_extensiontype_(self, extensiontype_):
+        self.extensiontype_ = extensiontype_
+
     def hasContent_(self):
         if (
 
@@ -1390,6 +1644,7 @@ class dataType(GeneratedsSuper):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='dataType', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1398,23 +1653,26 @@ class dataType(GeneratedsSuper):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='dataType')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='dataType', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='dataType'):
         if self.extensiontype_ is not None and 'xsi:type' not in already_processed:
             already_processed.add('xsi:type')
             outfile.write(' xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"')
             outfile.write(' xsi:type="%s"' % self.extensiontype_)
         pass
+
     def exportChildren(self, outfile, level, namespace_='', name_='dataType', fromsubclass_=False, pretty_print=True):
         pass
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1422,23 +1680,29 @@ class dataType(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         value = find_attr_value_('xsi:type', node)
         if value is not None and 'xsi:type' not in already_processed:
             already_processed.add('xsi:type')
             self.extensiontype_ = value
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
+
+
 # end class dataType
 
 
 class blockage(dataType):
     subclass = None
     superclass = dataType
+
     def __init__(self, image=None):
         self.original_tagname_ = None
         super(blockage, self).__init__()
         self.image = image
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1449,17 +1713,24 @@ class blockage(dataType):
             return blockage.subclass(*args_, **kwargs_)
         else:
             return blockage(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_image(self): return self.image
-    def set_image(self, image): self.image = image
+
+    def get_image(self):
+        return self.image
+
+    def set_image(self, image):
+        self.image = image
+
     def hasContent_(self):
         if (
-            self.image is not None or
-            super(blockage, self).hasContent_()
+                        self.image is not None or
+                    super(blockage, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='blockage', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1468,18 +1739,20 @@ class blockage(dataType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='blockage')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='blockage', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='blockage'):
         super(blockage, self).exportAttributes(outfile, level, already_processed, namespace_, name_='blockage')
+
     def exportChildren(self, outfile, level, namespace_='', name_='blockage', fromsubclass_=False, pretty_print=True):
         super(blockage, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
@@ -1488,6 +1761,7 @@ class blockage(dataType):
             eol_ = ''
         if self.image is not None:
             self.image.export(outfile, level, namespace_, name_='image', pretty_print=pretty_print)
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1495,8 +1769,10 @@ class blockage(dataType):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(blockage, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'image':
             obj_ = image.factory()
@@ -1504,15 +1780,19 @@ class blockage(dataType):
             self.image = obj_
             obj_.original_tagname_ = 'image'
         super(blockage, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class blockage
 
 
 class image(GeneratedsSuper):
     subclass = None
     superclass = None
+
     def __init__(self, url=None):
         self.original_tagname_ = None
         self.url = _cast(None, url)
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1523,9 +1803,15 @@ class image(GeneratedsSuper):
             return image.subclass(*args_, **kwargs_)
         else:
             return image(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_url(self): return self.url
-    def set_url(self, url): self.url = url
+
+    def get_url(self):
+        return self.url
+
+    def set_url(self, url):
+        self.url = url
+
     def hasContent_(self):
         if (
 
@@ -1533,6 +1819,7 @@ class image(GeneratedsSuper):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='image', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1541,21 +1828,25 @@ class image(GeneratedsSuper):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='image')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='image', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='image'):
         if self.url is not None and 'url' not in already_processed:
             already_processed.add('url')
-            outfile.write(' url=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.url), input_name='url')), ))
+            outfile.write(
+                ' url=%s' % (self.gds_encode(self.gds_format_string(quote_attrib(self.url), input_name='url')),))
+
     def exportChildren(self, outfile, level, namespace_='', name_='image', fromsubclass_=False, pretty_print=True):
         pass
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1563,22 +1854,28 @@ class image(GeneratedsSuper):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         value = find_attr_value_('url', node)
         if value is not None and 'url' not in already_processed:
             already_processed.add('url')
             self.url = value
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         pass
+
+
 # end class image
 
 
 class delivery(dataType):
     subclass = None
     superclass = dataType
+
     def __init__(self):
         self.original_tagname_ = None
         super(delivery, self).__init__()
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1589,14 +1886,17 @@ class delivery(dataType):
             return delivery.subclass(*args_, **kwargs_)
         else:
             return delivery(*args_, **kwargs_)
+
     factory = staticmethod(factory)
+
     def hasContent_(self):
         if (
-            super(delivery, self).hasContent_()
+                super(delivery, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='delivery', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1605,20 +1905,23 @@ class delivery(dataType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='delivery')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='delivery', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='delivery'):
         super(delivery, self).exportAttributes(outfile, level, already_processed, namespace_, name_='delivery')
+
     def exportChildren(self, outfile, level, namespace_='', name_='delivery', fromsubclass_=False, pretty_print=True):
         super(delivery, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         pass
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1626,21 +1929,27 @@ class delivery(dataType):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(delivery, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         super(delivery, self).buildChildren(child_, node, nodeName_, True)
         pass
+
+
 # end class delivery
 
 
 class depth(dataType):
     subclass = None
     superclass = dataType
+
     def __init__(self, depth_member=None):
         self.original_tagname_ = None
         super(depth, self).__init__()
         self.depth = depth_member
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1651,17 +1960,24 @@ class depth(dataType):
             return depth.subclass(*args_, **kwargs_)
         else:
             return depth(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_depth(self): return self.depth
-    def set_depth(self, depth): self.depth = depth
+
+    def get_depth(self):
+        return self.depth
+
+    def set_depth(self, depth):
+        self.depth = depth
+
     def hasContent_(self):
         if (
-            self.depth is not None or
-            super(depth, self).hasContent_()
+                        self.depth is not None or
+                    super(depth, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='depth', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1670,18 +1986,20 @@ class depth(dataType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='depth')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='depth', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='depth'):
         super(depth, self).exportAttributes(outfile, level, already_processed, namespace_, name_='depth')
+
     def exportChildren(self, outfile, level, namespace_='', name_='depth', fromsubclass_=False, pretty_print=True):
         super(depth, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
@@ -1690,7 +2008,9 @@ class depth(dataType):
             eol_ = ''
         if self.depth is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sdepth>%s</%sdepth>%s' % (namespace_, self.gds_format_float(self.depth, input_name='depth'), namespace_, eol_))
+            outfile.write('<%sdepth>%s</%sdepth>%s' % (
+                namespace_, self.gds_format_float(self.depth, input_name='depth'), namespace_, eol_))
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1698,8 +2018,10 @@ class depth(dataType):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(depth, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'depth':
             sval_ = child_.text
@@ -1710,16 +2032,20 @@ class depth(dataType):
             fval_ = self.gds_validate_float(fval_, node, 'depth')
             self.depth = fval_
         super(depth, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class depth
 
 
 class flow(dataType):
     subclass = None
     superclass = dataType
+
     def __init__(self, flow_member=None):
         self.original_tagname_ = None
         super(flow, self).__init__()
         self.flow = flow_member
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1730,17 +2056,24 @@ class flow(dataType):
             return flow.subclass(*args_, **kwargs_)
         else:
             return flow(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_flow(self): return self.flow
-    def set_flow(self, flow): self.flow = flow
+
+    def get_flow(self):
+        return self.flow
+
+    def set_flow(self, flow):
+        self.flow = flow
+
     def hasContent_(self):
         if (
-            self.flow is not None or
-            super(flow, self).hasContent_()
+                        self.flow is not None or
+                    super(flow, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='flow', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1749,18 +2082,20 @@ class flow(dataType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='flow')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='flow', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='flow'):
         super(flow, self).exportAttributes(outfile, level, already_processed, namespace_, name_='flow')
+
     def exportChildren(self, outfile, level, namespace_='', name_='flow', fromsubclass_=False, pretty_print=True):
         super(flow, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
@@ -1769,7 +2104,9 @@ class flow(dataType):
             eol_ = ''
         if self.flow is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sflow>%s</%sflow>%s' % (namespace_, self.gds_format_float(self.flow, input_name='flow'), namespace_, eol_))
+            outfile.write('<%sflow>%s</%sflow>%s' % (
+                namespace_, self.gds_format_float(self.flow, input_name='flow'), namespace_, eol_))
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1777,8 +2114,10 @@ class flow(dataType):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(flow, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'flow':
             sval_ = child_.text
@@ -1789,16 +2128,20 @@ class flow(dataType):
             fval_ = self.gds_validate_float(fval_, node, 'flow')
             self.flow = fval_
         super(flow, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class flow
 
 
 class gate(dataType):
     subclass = None
     superclass = dataType
+
     def __init__(self, position=None):
         self.original_tagname_ = None
         super(gate, self).__init__()
         self.position = position
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1809,17 +2152,24 @@ class gate(dataType):
             return gate.subclass(*args_, **kwargs_)
         else:
             return gate(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_position(self): return self.position
-    def set_position(self, position): self.position = position
+
+    def get_position(self):
+        return self.position
+
+    def set_position(self, position):
+        self.position = position
+
     def hasContent_(self):
         if (
-            self.position is not None or
-            super(gate, self).hasContent_()
+                        self.position is not None or
+                    super(gate, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='gate', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1828,18 +2178,20 @@ class gate(dataType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='gate')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='gate', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='gate'):
         super(gate, self).exportAttributes(outfile, level, already_processed, namespace_, name_='gate')
+
     def exportChildren(self, outfile, level, namespace_='', name_='gate', fromsubclass_=False, pretty_print=True):
         super(gate, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
@@ -1848,7 +2200,9 @@ class gate(dataType):
             eol_ = ''
         if self.position is not None:
             showIndent(outfile, level, pretty_print)
-            outfile.write('<%sposition>%s</%sposition>%s' % (namespace_, self.gds_format_float(self.position, input_name='position'), namespace_, eol_))
+            outfile.write('<%sposition>%s</%sposition>%s' % (
+                namespace_, self.gds_format_float(self.position, input_name='position'), namespace_, eol_))
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1856,8 +2210,10 @@ class gate(dataType):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(gate, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'position':
             sval_ = child_.text
@@ -1868,16 +2224,20 @@ class gate(dataType):
             fval_ = self.gds_validate_float(fval_, node, 'position')
             self.position = fval_
         super(gate, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class gate
 
 
 class strandedPerson(dataType):
     subclass = None
     superclass = dataType
+
     def __init__(self, image=None):
         self.original_tagname_ = None
         super(strandedPerson, self).__init__()
         self.image = image
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1888,17 +2248,24 @@ class strandedPerson(dataType):
             return strandedPerson.subclass(*args_, **kwargs_)
         else:
             return strandedPerson(*args_, **kwargs_)
+
     factory = staticmethod(factory)
-    def get_image(self): return self.image
-    def set_image(self, image): self.image = image
+
+    def get_image(self):
+        return self.image
+
+    def set_image(self, image):
+        self.image = image
+
     def hasContent_(self):
         if (
-            self.image is not None or
-            super(strandedPerson, self).hasContent_()
+                        self.image is not None or
+                    super(strandedPerson, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='strandedPerson', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1907,19 +2274,23 @@ class strandedPerson(dataType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='strandedPerson')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='strandedPerson', pretty_print=pretty_print)
             showIndent(outfile, level, pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='strandedPerson'):
-        super(strandedPerson, self).exportAttributes(outfile, level, already_processed, namespace_, name_='strandedPerson')
-    def exportChildren(self, outfile, level, namespace_='', name_='strandedPerson', fromsubclass_=False, pretty_print=True):
+        super(strandedPerson, self).exportAttributes(outfile, level, already_processed, namespace_,
+                                                     name_='strandedPerson')
+
+    def exportChildren(self, outfile, level, namespace_='', name_='strandedPerson', fromsubclass_=False,
+                       pretty_print=True):
         super(strandedPerson, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         if pretty_print:
             eol_ = '\n'
@@ -1927,6 +2298,7 @@ class strandedPerson(dataType):
             eol_ = ''
         if self.image is not None:
             self.image.export(outfile, level, namespace_, name_='image', pretty_print=pretty_print)
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1934,8 +2306,10 @@ class strandedPerson(dataType):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(strandedPerson, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         if nodeName_ == 'image':
             obj_ = image.factory()
@@ -1943,15 +2317,19 @@ class strandedPerson(dataType):
             self.image = obj_
             obj_.original_tagname_ = 'image'
         super(strandedPerson, self).buildChildren(child_, node, nodeName_, True)
+
+
 # end class strandedPerson
 
 
 class waterEdge(dataType):
     subclass = None
     superclass = dataType
+
     def __init__(self):
         self.original_tagname_ = None
         super(waterEdge, self).__init__()
+
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
             subclass = getSubclassFromModule_(
@@ -1962,14 +2340,17 @@ class waterEdge(dataType):
             return waterEdge.subclass(*args_, **kwargs_)
         else:
             return waterEdge(*args_, **kwargs_)
+
     factory = staticmethod(factory)
+
     def hasContent_(self):
         if (
-            super(waterEdge, self).hasContent_()
+                super(waterEdge, self).hasContent_()
         ):
             return True
         else:
             return False
+
     def export(self, outfile, level, namespace_='', name_='waterEdge', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
@@ -1978,20 +2359,23 @@ class waterEdge(dataType):
         if self.original_tagname_ is not None:
             name_ = self.original_tagname_
         showIndent(outfile, level, pretty_print)
-        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '', ))
+        outfile.write('<%s%s%s' % (namespace_, name_, namespacedef_ and ' ' + namespacedef_ or '',))
         already_processed = set()
         self.exportAttributes(outfile, level, already_processed, namespace_, name_='waterEdge')
         if self.hasContent_():
-            outfile.write('>%s' % (eol_, ))
+            outfile.write('>%s' % (eol_,))
             self.exportChildren(outfile, level + 1, namespace_='', name_='waterEdge', pretty_print=pretty_print)
             outfile.write('</%s%s>%s' % (namespace_, name_, eol_))
         else:
-            outfile.write('/>%s' % (eol_, ))
+            outfile.write('/>%s' % (eol_,))
+
     def exportAttributes(self, outfile, level, already_processed, namespace_='', name_='waterEdge'):
         super(waterEdge, self).exportAttributes(outfile, level, already_processed, namespace_, name_='waterEdge')
+
     def exportChildren(self, outfile, level, namespace_='', name_='waterEdge', fromsubclass_=False, pretty_print=True):
         super(waterEdge, self).exportChildren(outfile, level, namespace_, name_, True, pretty_print=pretty_print)
         pass
+
     def build(self, node):
         already_processed = set()
         self.buildAttributes(node, node.attrib, already_processed)
@@ -1999,11 +2383,15 @@ class waterEdge(dataType):
             nodeName_ = Tag_pattern_.match(child.tag).groups()[-1]
             self.buildChildren(child, node, nodeName_)
         return self
+
     def buildAttributes(self, node, attrs, already_processed):
         super(waterEdge, self).buildAttributes(node, attrs, already_processed)
+
     def buildChildren(self, child_, node, nodeName_, fromsubclass_=False):
         super(waterEdge, self).buildChildren(child_, node, nodeName_, True)
         pass
+
+
 # end class waterEdge
 
 
@@ -2021,7 +2409,6 @@ GDSClassesMapping = {
     'value': dataType,
     'wateredge': waterEdge,
 }
-
 
 USAGE_TEXT = """
 Usage: python <Parser>.py [ -s ] <in_xml_file>
@@ -2137,9 +2524,8 @@ def main():
 
 
 if __name__ == '__main__':
-    #import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     main()
-
 
 __all__ = [
     "blockage",

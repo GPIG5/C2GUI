@@ -20,7 +20,8 @@
 import sys
 from lxml import etree as etree_
 
-import ??? as supermod
+import c2ext.schema as supermod
+
 
 def parsexml_(infile, parser=None, **kwargs):
     if parser is None:
@@ -30,11 +31,13 @@ def parsexml_(infile, parser=None, **kwargs):
     doc = etree_.parse(infile, parser=parser, **kwargs)
     return doc
 
+
 #
 # Globals
 #
 
 ExternalEncoding = 'utf-8'
+
 
 #
 # Data representation classes
@@ -44,126 +47,198 @@ ExternalEncoding = 'utf-8'
 class gpigDataSub(supermod.gpigData):
     def __init__(self, gisposition=None):
         super(gpigDataSub, self).__init__(gisposition, )
+
+
 supermod.gpigData.subclass = gpigDataSub
+
+
 # end class gpigDataSub
 
 
 class gisPositionSub(supermod.gisPosition):
     def __init__(self, position=None, timestamp=None, value=None):
         super(gisPositionSub, self).__init__(position, timestamp, value, )
+
+
 supermod.gisPosition.subclass = gisPositionSub
+
+
 # end class gisPositionSub
 
 
 class positionSub(supermod.position):
     def __init__(self, extensiontype_=None):
         super(positionSub, self).__init__(extensiontype_, )
+
+
 supermod.position.subclass = positionSub
+
+
 # end class positionSub
 
 
 class pointSub(supermod.point):
     def __init__(self, position=None):
         super(pointSub, self).__init__(position, )
+
+
 supermod.point.subclass = pointSub
+
+
 # end class pointSub
 
 
 class coordSub(supermod.coord):
     def __init__(self, latitude=None, longitude=None):
         super(coordSub, self).__init__(latitude, longitude, )
+
+
 supermod.coord.subclass = coordSub
+
+
 # end class coordSub
 
 
 class boundingBoxSub(supermod.boundingBox):
     def __init__(self, topleft=None, topright=None):
         super(boundingBoxSub, self).__init__(topleft, topright, )
+
+
 supermod.boundingBox.subclass = boundingBoxSub
+
+
 # end class boundingBoxSub
 
 
 class polarSub(supermod.polar):
     def __init__(self, point=None, radius=None):
         super(polarSub, self).__init__(point, radius, )
+
+
 supermod.polar.subclass = polarSub
+
+
 # end class polarSub
 
 
 class polySub(supermod.poly):
     def __init__(self, coords=None):
         super(polySub, self).__init__(coords, )
+
+
 supermod.poly.subclass = polySub
+
+
 # end class polySub
 
 
 class timestampSub(supermod.timestamp):
     def __init__(self, date=None):
         super(timestampSub, self).__init__(date, )
+
+
 supermod.timestamp.subclass = timestampSub
+
+
 # end class timestampSub
 
 
 class dataTypeSub(supermod.dataType):
     def __init__(self, extensiontype_=None):
         super(dataTypeSub, self).__init__(extensiontype_, )
+
+
 supermod.dataType.subclass = dataTypeSub
+
+
 # end class dataTypeSub
 
 
 class blockageSub(supermod.blockage):
     def __init__(self, image=None):
         super(blockageSub, self).__init__(image, )
+
+
 supermod.blockage.subclass = blockageSub
+
+
 # end class blockageSub
 
 
 class imageSub(supermod.image):
     def __init__(self, url=None):
         super(imageSub, self).__init__(url, )
+
+
 supermod.image.subclass = imageSub
+
+
 # end class imageSub
 
 
 class deliverySub(supermod.delivery):
     def __init__(self):
         super(deliverySub, self).__init__()
+
+
 supermod.delivery.subclass = deliverySub
+
+
 # end class deliverySub
 
 
 class depthSub(supermod.depth):
     def __init__(self, depth_member=None):
         super(depthSub, self).__init__(depth_member, )
+
+
 supermod.depth.subclass = depthSub
+
+
 # end class depthSub
 
 
 class flowSub(supermod.flow):
     def __init__(self, flow_member=None):
         super(flowSub, self).__init__(flow_member, )
+
+
 supermod.flow.subclass = flowSub
+
+
 # end class flowSub
 
 
 class gateSub(supermod.gate):
     def __init__(self, position=None):
         super(gateSub, self).__init__(position, )
+
+
 supermod.gate.subclass = gateSub
+
+
 # end class gateSub
 
 
 class strandedPersonSub(supermod.strandedPerson):
     def __init__(self, image=None):
         super(strandedPersonSub, self).__init__(image, )
+
+
 supermod.strandedPerson.subclass = strandedPersonSub
+
+
 # end class strandedPersonSub
 
 
 class waterEdgeSub(supermod.waterEdge):
     def __init__(self):
         super(waterEdgeSub, self).__init__()
+
+
 supermod.waterEdge.subclass = waterEdgeSub
+
+
 # end class waterEdgeSub
 
 
@@ -282,5 +357,5 @@ def main():
 
 
 if __name__ == '__main__':
-    #import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
     main()
