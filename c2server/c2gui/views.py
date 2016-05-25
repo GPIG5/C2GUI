@@ -8,7 +8,7 @@ from .communicator import Communicator
 from .utils import *
 from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
-from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh
+from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh
 from .point import Point, Space
 
 from decimal import Decimal
@@ -17,6 +17,8 @@ import simplejson
 import json
 import geopy
 import geopy.distance
+import logging
+logging.basicConfig(filename='access.log', level=logging.DEBUG)
 
 def index(request):
     events = Event.objects.all()
@@ -66,6 +68,7 @@ def send_drone_data(request):
     unicode_message = request.body.decode("utf-8")
     #print(unicode_message)
     json_message = json.loads(unicode_message)
+    logging.debug(json_message)
     if json_message["data"]["datatype"] == "pinor":
         decoded_message = PinorMesh.from_json(json_message)
         for pinor in decoded_message.pinor:
@@ -78,15 +81,26 @@ def send_drone_data(request):
                                       ).first()
             region.status = "RE"
             region.save()
-            new_pinor = Pinor(lat=pinor.latitude, lon=pinor.longitude, region=region)
+            new_pinor, created = Pinor.objects.get_or_create(lat=pinor.latitude, lon=pinor.longitude, defaults = {"region":region})
             new_pinor.save()
             new_event = Event(event_type='POI', headline="Found a stranded person", text="Found a stranded person at %f N %f W" % (pinor.latitude, -pinor.longitude), pinor=new_pinor)
             new_event.save()
-        #print(decoded_message)
-    if json_message["data"]["datatype"] == "status":
+    elif json_message["data"]["datatype"] == "status":
         decoded_message = StatusMesh.from_json(json_message)
         drone, created = Drone.objects.update_or_create(uid=decoded_message.uuid,
             defaults = {"lat":decoded_message.location.latitude, "lon":decoded_message.location.longitude})
+    elif json_message["data"]["datatype"] == "complete":
+        print(json_message)
+        decoded_message = CompleteMesh.from_json(json_message)
+        bottomleftlat = decoded_message.space.bottom_left["latitude"]
+        bottomleftlon = decoded_message.space.bottom_left["longitude"]
+        toprightlat = decoded_message.space.top_right["latitude"]
+        toprightlon = decoded_message.space.top_right["longitude"]
+        areasComplete = SearchArea.objects.exclude(
+            Q(lat__gt=toprightlat) | Q(lat__lt=bottomleftlat-REG_HEIGHT)
+            ).exclude(Q(lon__gt=toprightlon) | Q(lon__lt=bottomleftlon-REG_WIDTH)
+            )
+        areasComplete.filter(status='NE').update(status='NRE')
     return HttpResponse("received data")
 
 def retrieve_new_data(request):

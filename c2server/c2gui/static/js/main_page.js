@@ -49,11 +49,11 @@ $( document ).ready(function() {
               console.log(new_event);
               if (new_event.pinor) {
                   if (new_event.pinor.region.status === "RE"){
-                      $("#region" + new_event.pinor.region).css({"background-color": "red", "opacity": 0.4});
+                      $("#region" + new_event.pinor.region.id).css({"background-color": "red", "opacity": 0.4});
                   } else if (new_event.pinor.region.status === "DD"){
-                      $("#region" + new_event.pinor.region).css({"background-color": "yellow", "opacity": 0.4});
+                      $("#region" + new_event.pinor.region.id).css({"background-color": "yellow", "opacity": 0.4});
                   } else if (new_event.pinor.region.status === "NRE"){
-                      $("#region" + new_event.pinor.region).css({"background-color": "green", "opacity": 0.4});
+                      $("#region" + new_event.pinor.region.id).css({"background-color": "green", "opacity": 0.4});
                   }
               }
           }
