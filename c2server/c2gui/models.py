@@ -42,6 +42,7 @@ class Drone(models.Model):
     uid = models.CharField(max_length=36, primary_key=True)
     lat = models.DecimalField(max_digits=8, decimal_places=6)
     lon = models.DecimalField(max_digits=8, decimal_places=6)
+    last_communication = models.DateTimeField(auto_now=True)
 
 ##### Custom Serializers #####
 

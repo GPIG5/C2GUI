@@ -75,5 +75,5 @@
 }( jQuery, window ));
 
 $(document).ready(function() {
-    $('#mapContainer').sliced({x: 20, y: 16});
+    $('#mapContainer').sliced({x: 40, y: 32});
 });

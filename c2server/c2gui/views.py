@@ -11,13 +11,15 @@ from .map_settings import REG_WIDTH, REG_HEIGHT
 from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh
 from .point import Point, Space
 
-from decimal import Decimal
+from decimal import *
 import codecs
 import simplejson
 import json
 import geopy
 import geopy.distance
 import logging
+import datetime
+import pytz
 logging.basicConfig(filename='access.log', level=logging.DEBUG)
 
 def index(request):
@@ -43,7 +45,7 @@ def send_search_coord(request):
     coordinates = {"bottomleft": {"latitude": bottomleftlat, "longitude": bottomleftlon},
                    "topright": {"latitude": toprightlat, "longitude": toprightlon}
     }
-    new_event = Event(event_type='IS', headline="Initiated search", text = "Iniated search for the area (%f N, %f W):(%f N, %f W)" % (bottomleftlat, -bottomleftlon, toprightlat, -toprightlon))
+    new_event = Event(event_type='IS', headline="Initiated search", text = "Iniated search for the area (%f N, %f W):(%f N, %f W)" % (bottomleftlat, -bottomleftlon, toprightlat, -toprightlon), is_new=False)
     new_event.save()
     bottomleft = Point(latitude=bottomleftlat, longitude=bottomleftlon, altitude=0)
     topright = Point(latitude=toprightlat, longitude=toprightlon, altitude=0)
@@ -72,6 +74,7 @@ def send_drone_data(request):
     if json_message["data"]["datatype"] == "pinor":
         decoded_message = PinorMesh.from_json(json_message)
         for pinor in decoded_message.pinor:
+            getcontext().prec = 6
             lat = Decimal(pinor.latitude)
             lon = Decimal(pinor.longitude)
             region = SearchArea.objects.filter(lat__lte=lat
@@ -81,7 +84,7 @@ def send_drone_data(request):
                                       ).first()
             region.status = "RE"
             region.save()
-            new_pinor, created = Pinor.objects.get_or_create(lat=pinor.latitude, lon=pinor.longitude, defaults = {"region":region})
+            new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults = {"region":region})
             new_pinor.save()
             new_event = Event(event_type='POI', headline="Found a stranded person", text="Found a stranded person at %f N %f W" % (pinor.latitude, -pinor.longitude), pinor=new_pinor)
             new_event.save()
@@ -92,10 +95,10 @@ def send_drone_data(request):
     elif json_message["data"]["datatype"] == "complete":
         print(json_message)
         decoded_message = CompleteMesh.from_json(json_message)
-        bottomleftlat = decoded_message.space.bottom_left["latitude"]
-        bottomleftlon = decoded_message.space.bottom_left["longitude"]
-        toprightlat = decoded_message.space.top_right["latitude"]
-        toprightlon = decoded_message.space.top_right["longitude"]
+        bottomleftlat = Decimal(decoded_message.space.bottom_left["lat"])
+        bottomleftlon = Decimal(decoded_message.space.bottom_left["lon"])
+        toprightlat = Decimal(decoded_message.space.top_right["lat"])
+        toprightlon = Decimal(decoded_message.space.top_right["lon"])
         areasComplete = SearchArea.objects.exclude(
             Q(lat__gt=toprightlat) | Q(lat__lt=bottomleftlat-REG_HEIGHT)
             ).exclude(Q(lon__gt=toprightlon) | Q(lon__lt=bottomleftlon-REG_WIDTH)
@@ -109,6 +112,10 @@ def retrieve_new_data(request):
     new_event_list = event_serializer.data
     new_events.update(is_new=False)
     
+    # remove old drones from the database
+    min_date = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(minutes=15)
+    old_drones = Drone.objects.exclude(last_communication__range=[min_date, datetime.datetime.now(tz=pytz.utc)])
+    old_drones.delete()
     drones = Drone.objects.all()
     drone_serializer = DroneSerializer(drones, many=True)
     drones_list = drone_serializer.data
