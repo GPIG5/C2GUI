@@ -34,6 +34,7 @@ class Pinor(models.Model):
     lat = models.DecimalField(max_digits=8, decimal_places=6)
     lon = models.DecimalField(max_digits=8, decimal_places=6)
     region = models.ForeignKey('SearchArea', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField()
 
     class Meta:
         unique_together = ('lat', 'lon',)
