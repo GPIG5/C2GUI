@@ -17,9 +17,9 @@ class SearchArea(models.Model):
 
 class Event(models.Model):
     EVENT_TYPES = (
-        ('ST', 'Started the server'),
         ('IS', 'Initiated search'),
         ('POI', 'Found a point of interest'),
+        ('CS', 'Completed search'),
     )
 
     event_type = models.CharField(max_length=3, choices=EVENT_TYPES)
@@ -29,6 +29,7 @@ class Event(models.Model):
     pinor = models.ForeignKey('Pinor', on_delete=models.CASCADE, blank=True, null=True)
     # whether the events have been seen by the operator
     is_new = models.BooleanField(default=True)
+    regions = models.ManyToManyField(SearchArea)
 
 class Pinor(models.Model):
     lat = models.DecimalField(max_digits=8, decimal_places=6)
@@ -61,7 +62,7 @@ class PinorSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('event_type', 'headline', 'text', 'timestamp', 'pinor')
+        fields = ('event_type', 'headline', 'text', 'timestamp', 'pinor', 'regions')
         depth = 2
 
 class DroneSerializer(serializers.ModelSerializer):

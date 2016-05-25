@@ -48,6 +48,7 @@ def send_search_coord(request):
     }
     new_event = Event(event_type='IS', headline="Initiated search", text = "Iniated search for the area (%f N, %f W):(%f N, %f W)" % (bottomleftlat, -bottomleftlon, toprightlat, -toprightlon), is_new=False)
     new_event.save()
+    new_event.regions.add(*list(areasToSearch))
     bottomleft = Point(latitude=bottomleftlat, longitude=bottomleftlon, altitude=0)
     topright = Point(latitude=toprightlat, longitude=toprightlon, altitude=0)
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
@@ -94,7 +95,6 @@ def send_drone_data(request):
         drone, created = Drone.objects.update_or_create(uid=decoded_message.uuid,
             defaults = {"lat":decoded_message.location.latitude, "lon":decoded_message.location.longitude})
     elif json_message["data"]["datatype"] == "complete":
-        print(json_message)
         decoded_message = CompleteMesh.from_json(json_message)
         bottomleftlat = Decimal(decoded_message.space.bottom_left["lat"])
         bottomleftlon = Decimal(decoded_message.space.bottom_left["lon"])
@@ -104,7 +104,10 @@ def send_drone_data(request):
             Q(lat__gt=toprightlat) | Q(lat__lt=bottomleftlat-REG_HEIGHT)
             ).exclude(Q(lon__gt=toprightlon) | Q(lon__lt=bottomleftlon-REG_WIDTH)
             )
-        areasComplete.filter(status='NE').update(status='NRE')
+        areasComplete.update(status='NRE')
+        new_event = Event(event_type='CS', headline="Completed search", text="Completed search at the area (%f N, %f W):(%f N, %f W)" % (bottomleftlat, -bottomleftlon, toprightlat, -toprightlon,))
+        new_event.save()
+        new_event.regions.add(*list(areasComplete))
     return HttpResponse("received data")
 
 def retrieve_new_data(request):

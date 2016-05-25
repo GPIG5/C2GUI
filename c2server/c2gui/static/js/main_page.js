@@ -20,8 +20,8 @@ $( document ).ready(function() {
       $.ajax({
         url: 'retrieve_new_data',
         success: function(data) {
-          //console.log(data);
           let new_events = data.new_events;
+          console.log(new_events);
           let drones = data.drones;
           for (let drone of drones) {
               calculateDroneImageCoordinates(drone);
@@ -54,6 +54,13 @@ $( document ).ready(function() {
                       $("#region" + new_event.pinor.region.id).css({"background-color": "yellow", "opacity": 0.4});
                   } else if (new_event.pinor.region.status === "NRE"){
                       $("#region" + new_event.pinor.region.id).css({"background-color": "green", "opacity": 0.4});
+                  }
+              }
+              if (new_event.regions.length > 0) {
+                  if (new_event.event_type === "CS"){
+                      for (let region of new_event.regions) {
+                          $("#region" + region.id).css({"background-color": "green", "opacity": 0.4});
+                      }
                   }
               }
           }
