@@ -18,6 +18,8 @@ import simplejson
 import json
 import geopy
 import geopy.distance
+import datetime
+import pytz
 
 def index(request):
     events = Event.objects.all()
@@ -80,7 +82,8 @@ def send_drone_data(request):
                                       ).first()
             region.status = "RE"
             region.save()
-            new_pinor = Pinor(lat=pinor.latitude, lon=pinor.longitude, region=region)
+            new_pinor = Pinor(lat=pinor.latitude, lon=pinor.longitude,
+                              timestamp=datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc), region=region)
             new_pinor.save()
             new_event = Event(event_type='POI', headline="Found a stranded person", text="Found a stranded person at %f N %f W" % (pinor.latitude, -pinor.longitude), pinor=new_pinor)
             new_event.save()
