@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
@@ -20,6 +20,8 @@ import geopy
 import geopy.distance
 import datetime
 import pytz
+
+from c2ext.c2_data import get_xml_string
 
 def index(request):
     events = Event.objects.all()
@@ -97,3 +99,16 @@ def retrieve_new_events(request):
     new_event_list = event_serializer.data
     new_events.update(is_new=False)
     return HttpResponse(simplejson.dumps({"new_events": new_event_list}), content_type='application/json')
+
+
+@csrf_exempt
+def send_c2_data(request):
+    print("received c2 data request")
+    data_str = get_xml_string()
+
+    if not data_str:
+        print("error in creating xml")
+        return HttpResponseServerError()
+    else:
+        print("sent xml data")
+        return HttpResponse(data_str, content_type='application/xml')

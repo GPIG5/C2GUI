@@ -26,10 +26,7 @@ import warnings as warnings_
 from lxml import etree as etree_
 
 Validate_simpletypes_ = True
-if sys.version_info.major == 2:
-    BaseStrType_ = basestring
-else:
-    BaseStrType_ = str
+BaseStrType_ = str
 
 
 def parsexml_(infile, parser=None, **kwargs):
@@ -2474,7 +2471,7 @@ def parseEtree(inFileName, silence=False):
 
 
 def parseString(inString, silence=False):
-    from StringIO import StringIO
+    from io import StringIO
     parser = None
     doc = parsexml_(StringIO(inString), parser)
     rootNode = doc.getroot()

@@ -1,17 +1,20 @@
 import time
+from io import StringIO
 
 from c2gui.models import Pinor
-from c2ext.schemaSubs import gpigDataSub, gisPositionSub, coordSub, timestampSub, strandedPersonSub
+from c2ext.schemaSubs import gpigDataSub, gisPositionSub, coordSub, timestampSub, strandedPersonSub, pointSub
 
 
-def send_xml_data():
+def get_xml_string():
     """
-    Responds to request for data
-    :return: nothing
+    :return: xml data in string format
     """
     pinors = get_all_pinors()
     xml = create_xml(pinors)
-    return
+    out = StringIO()
+    xml.export(out, 0)
+    xml_str = out.getvalue()
+    return xml_str
 
 
 def get_all_pinors():
@@ -30,9 +33,10 @@ def create_xml(pinor_list):
     root = gpigDataSub()
     for pinor in pinor_list:
         coord = coordSub(pinor.get("lat"), pinor.get("lon"))
+        point = pointSub(coord)
         date_time = time.localtime(pinor.get("timestamp"))
         time_stamp = timestampSub(time.strftime('%Y-%m-%dT%H:%M:%S', date_time))
-        gis = gisPositionSub(coord, time_stamp, strandedPersonSub())
+        gis = gisPositionSub(point, time_stamp, strandedPersonSub())
         root.add_gisposition(gis)
     return root
 

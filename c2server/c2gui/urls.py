@@ -11,4 +11,5 @@ urlpatterns = [
 name='get_all_regions_status'),
     url(r'^send_drone_data$', views.send_drone_data, name='send_drone_data'),
     url(r'^retrieve_new_events$', views.retrieve_new_events, name='retrieve_new_events'),
+    url(r'^send_c2_data$', views.send_c2_data, name='send_c2_data'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
