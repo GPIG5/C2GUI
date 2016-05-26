@@ -24,7 +24,7 @@ class Event(models.Model):
 
     event_type = models.CharField(max_length=3, choices=EVENT_TYPES)
     headline = models.CharField(max_length=25)
-    text = models.CharField(max_length=50)
+    text = models.CharField(max_length=150)
     timestamp = models.DateTimeField(auto_now_add=True)
     pinor = models.ForeignKey('Pinor', on_delete=models.CASCADE, blank=True, null=True)
     # whether the events have been seen by the operator
