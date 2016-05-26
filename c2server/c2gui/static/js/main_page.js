@@ -18,10 +18,15 @@ $( document ).ready(function() {
 
     (function periodic_worker() {
       $.ajax({
-        url: 'retrieve_new_events',
+        url: 'retrieve_new_data',
         success: function(data) {
-          console.log(data);
           let new_events = data.new_events;
+          console.log(new_events);
+          let drones = data.drones;
+          for (let drone of drones) {
+              calculateDroneImageCoordinates(drone);
+          }
+
           for (let new_event of new_events) {
               event_date = new Date(new_event.timestamp);
               var ev = {
@@ -40,17 +45,28 @@ $( document ).ready(function() {
                       "text": new_event.text
                   }
               };
-              console.log(ev);
               timeline.add(ev);
-              if (new_event.region) {
-                  if (new_event.region_status === "RE"){
-                      $("#region" + new_event.region).css({"background-color": "red", "opacity": 0.4});
-                  } else if (new_event.region_status === "DD"){
-                      $("#region" + new_event.region).css({"background-color": "yellow", "opacity": 0.4});
+              console.log(new_event);
+              if (new_event.pinor) {
+                  if (new_event.pinor.region.status === "RE"){
+                      $("#region" + new_event.pinor.region.id).css({"background-color": "red", "opacity": 0.4});
+                  } else if (new_event.pinor.region.status === "DD"){
+                      $("#region" + new_event.pinor.region.id).css({"background-color": "yellow", "opacity": 0.4});
+                  } else if (new_event.pinor.region.status === "NRE"){
+                      $("#region" + new_event.pinor.region.id).css({"background-color": "green", "opacity": 0.4});
+                  }
+              }
+              if (new_event.regions.length > 0) {
+                  if (new_event.event_type === "CS"){
+                      for (let region of new_event.regions) {
+                          $("#region" + region.id).css({"background-color": "green", "opacity": 0.4});
+                      }
                   }
               }
           }
-          timeline.goToEnd();
+          if (new_events.length > 0){
+              timeline.goToEnd();
+          }
         },
         complete: function() {
           // Schedule the next request when the current one is complete
@@ -224,6 +240,15 @@ $( document ).ready(function() {
                 "top": e.pageY - $("#map").offset().top
             });
         }
+    }
+
+    function calculateDroneImageCoordinates(drone) {
+        left_offset = (drone.lon - min_lon)/(max_lon - min_lon)*map_width;
+        top_offset = (max_lat - drone.lat)/(max_lat - min_lat)*map_height;
+        if ($("#drone" + drone.uid).length == 0) {
+            $("#drone-container").append("<img class='drone' id='drone" + drone.uid + "' src='/static/img/drone.png'>");
+        }
+        $("#drone" + drone.uid).css({"margin-left": left_offset, "margin-top": top_offset});
     }
 
 });

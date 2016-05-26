@@ -25,6 +25,7 @@
     <div id="mapContainer">
         <div class="ghost-select"><span></span></div>
         <img id="map" src="{% static 'img/yorktex.jpg' %}">
+        <div id="drone-container"></div>
     </div> <br>
     
     <div class="right-side-container">
@@ -78,6 +79,14 @@
     {% include "c2gui/vertical_timeline.html" %}
     </div>
 
+   <div id="legend-container">
+     <ul class="legend">
+       <li><span class="inprogress"></span> Search in Progress</li>
+       <li><span class="rescueneeded"></span> Persons in Need Detected </li>
+       <li><span class="norescueneeded"></span> No Persons in Need Detected</li>
+       <li><span class="notexplored"></span> Not Explored</li>
+     </ul>
+   </div>
   </div> <!--page-wrapper-->
 <script src="{% static 'js/jquery.mobile.custom.min.js' %}"></script>
     

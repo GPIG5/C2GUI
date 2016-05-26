@@ -53,8 +53,10 @@
                     for (let region of regionStatuses) {
                         if (region.status === 'DD') {
                             $('#region' + region.id).css({'background-color': 'yellow', 'opacity': 0.4});
-                        } else if (region.status == 'RE') {
-                            $('#region' + region.id).css({'background-color': 'red', 'opacity': 0.5});
+                        } else if (region.status === 'RE') {
+                            $('#region' + region.id).css({'background-color': 'red', 'opacity': 0.4});
+                        } else if (region.status === 'NRE'){
+                            $("#region" + region.id).css({'background-color': 'green', 'opacity': 0.4});
                         } else {
                             $('#region' + region.id).css({'opacity':0});
                         }
@@ -73,5 +75,5 @@
 }( jQuery, window ));
 
 $(document).ready(function() {
-    $('#mapContainer').sliced({x: 20, y: 16});
+    $('#mapContainer').sliced({x: 40, y: 32});
 });

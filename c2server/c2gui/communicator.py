@@ -18,6 +18,7 @@ class Communicator:
         print(encoded_message)
         self.sock.send(struct.pack("!L", len(encoded_message)))
         self.sock.send(encoded_message)
+        print("sent a message")
 
     def close(self):
         self.sock.close()
