@@ -2,17 +2,16 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Tue May 24 14:21:58 2016 by generateDS.py version 2.22b.
+# Generated Thu May 26 17:20:24 2016 by generateDS.py version 2.22b.
 #
 # Command line options:
 #   ('-o', 'schema.py')
-#   ('-s', 'schemaSubs.py')
 #
 # Command line arguments:
 #   ..\schema\gpig.xsd
 #
 # Command line:
-#   generateDS.py -o "schema.py" -s "schemaSubs.py" ..\schema\gpig.xsd
+#   generateDS.py -o "schema.py" ..\schema\gpig.xsd
 #
 # Current working directory (os.getcwd()):
 #   generateds
@@ -33,7 +32,11 @@ def parsexml_(infile, parser=None, **kwargs):
     if parser is None:
         # Use the lxml ElementTree compatible parser so that, e.g.,
         #   we ignore comments.
-        parser = etree_.ETCompatXMLParser()
+        with open('c2ext\gpig.xsd', 'rb') as file:
+            schema_str = file.read()
+        schema_root = etree_.XML(schema_str)
+        schema = etree_.XMLSchema(schema_root)
+        parser = etree_.ETCompatXMLParser(schema=schema)
     doc = etree_.parse(infile, parser=parser, **kwargs)
     return doc
 
@@ -1382,7 +1385,7 @@ class polar(position):
         if self.radius is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%sradius>%s</%sradius>%s' % (
-                namespace_, self.gds_format_float(self.radius, input_name='radius'), namespace_, eol_))
+            namespace_, self.gds_format_float(self.radius, input_name='radius'), namespace_, eol_))
 
     def build(self, node):
         already_processed = set()
@@ -2006,7 +2009,7 @@ class depth(dataType):
         if self.depth is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%sdepth>%s</%sdepth>%s' % (
-                namespace_, self.gds_format_float(self.depth, input_name='depth'), namespace_, eol_))
+            namespace_, self.gds_format_float(self.depth, input_name='depth'), namespace_, eol_))
 
     def build(self, node):
         already_processed = set()
@@ -2102,7 +2105,7 @@ class flow(dataType):
         if self.flow is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%sflow>%s</%sflow>%s' % (
-                namespace_, self.gds_format_float(self.flow, input_name='flow'), namespace_, eol_))
+            namespace_, self.gds_format_float(self.flow, input_name='flow'), namespace_, eol_))
 
     def build(self, node):
         already_processed = set()
@@ -2198,7 +2201,7 @@ class gate(dataType):
         if self.position is not None:
             showIndent(outfile, level, pretty_print)
             outfile.write('<%sposition>%s</%sposition>%s' % (
-                namespace_, self.gds_format_float(self.position, input_name='position'), namespace_, eol_))
+            namespace_, self.gds_format_float(self.position, input_name='position'), namespace_, eol_))
 
     def build(self, node):
         already_processed = set()

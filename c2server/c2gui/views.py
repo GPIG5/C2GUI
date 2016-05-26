@@ -17,21 +17,15 @@ import simplejson
 import json
 import geopy
 import geopy.distance
-import datetime
-import pytz
-from c2ext.c2_data import get_xml_string
-
 import logging
 import datetime
 import pytz
 logging.basicConfig(filename='access.log', level=logging.DEBUG)
 
-
 def index(request):
     events = Event.objects.all()
     print(events)
     return render(request, 'c2gui/index.html', {"event_list": events})
-
 
 def send_search_coord(request):
     bottomleftlat = Decimal(request.POST['bottomleftlat'])
@@ -70,12 +64,10 @@ def send_search_coord(request):
                                                         "second": new_event.timestamp.second}
                                           }), content_type='application/json')
 
-
 def get_all_regions_status(request):
     Event.objects.update(is_new=False)
     data = list(SearchArea.objects.values('id', 'status'))
     return HttpResponse(simplejson.dumps({"statuses": data}), content_type='application/json')
-
 
 @csrf_exempt
 def send_drone_data(request):
@@ -89,22 +81,9 @@ def send_drone_data(request):
             getcontext().prec = 6
             lat = Decimal(pinor.latitude)
             lon = Decimal(pinor.longitude)
-            region = SearchArea.objects.filter(lat__lte=lat
-                                               ).filter(lat__gte=lat - REG_HEIGHT
-                                                        ).filter(lon__gte=lon - REG_WIDTH
-                                                                 ).filter(lon__lte=lon
-                                                                          ).first()
-            region.status = "RE"
-            region.save()
-            new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults={"region": region,
-                                                                                         "timestamp": datetime.utcfromtimestamp(
-                                                                                             decoded_message.timestamp).replace(
-                                                                                             tzinfo=pytz.utc)})
-            new_pinor.save()
-            new_event = Event(event_type='POI', headline="Found a stranded person",
-                              text="Found a stranded person at %f N %f W" % (pinor.latitude, -pinor.longitude),
-                              pinor=new_pinor)
-            new_event.save()
+            time_stamp = datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)
+            save_new_pinor(lat, lon, time_stamp)
+
     elif json_message["data"]["datatype"] == "status":
         decoded_message = StatusMesh.from_json(json_message)
         drone, created = Drone.objects.update_or_create(uid=decoded_message.uuid,
@@ -128,6 +107,23 @@ def send_drone_data(request):
         new_event.regions.add(*list(areasComplete))
     return HttpResponse("received data")
 
+def save_new_pinor(lat, lon, timestamp):
+    region = SearchArea.objects.filter(lat__lte=lat
+                                       ).filter(lat__gte=lat - REG_HEIGHT
+                                                ).filter(lon__gte=lon - REG_WIDTH
+                                                         ).filter(lon__lte=lon
+                                                                  ).first()
+    if not region:
+        return
+    region.status = "RE"
+    region.save()
+    new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults={"region": region,
+                                                                                 "timestamp": timestamp})
+    new_pinor.save()
+    new_event = Event(event_type='POI', headline="Found a stranded person",
+                  text="Found a stranded person at %f N %f W" % (lat, -lon),
+                  pinor=new_pinor)
+    new_event.save()
 
 def retrieve_new_data(request):
     new_events = Event.objects.filter(is_new=True)
@@ -146,8 +142,9 @@ def retrieve_new_data(request):
                         content_type='application/json')
 @csrf_exempt
 def send_c2_data(request):
+    from c2ext.c2_data import create_xml_for_ext_c2
     print("received c2 data request")
-    data_str = get_xml_string()
+    data_str = create_xml_for_ext_c2()
 
     if not data_str:
         print("error in creating xml")
@@ -155,3 +152,7 @@ def send_c2_data(request):
     else:
         print("sent xml data")
         return HttpResponse(data_str, content_type='application/xml')
+
+
+def retrieve_new_events(request):
+    return HttpResponse("test")
