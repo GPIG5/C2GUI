@@ -25,7 +25,6 @@ logging.basicConfig(filename='access.log', level=logging.DEBUG)
 
 def index(request):
     events = Event.objects.all()
-    print(events)
     return render(request, 'c2gui/index.html', {"event_list": events})
 
 def send_search_coord(request):

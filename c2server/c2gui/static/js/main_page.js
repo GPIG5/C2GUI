@@ -248,7 +248,7 @@ $( document ).ready(function() {
         if ($("#drone" + drone.uid).length == 0) {
             $("#drone-container").append("<img class='drone' id='drone" + drone.uid + "' src='/static/img/drone.png'>");
         }
-        $("#drone" + drone.uid).css({"margin-left": left_offset, "margin-top": top_offset});
+        $("#drone" + drone.uid).css({"left": left_offset, "top": top_offset});
     }
 
 });
