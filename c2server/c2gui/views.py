@@ -85,7 +85,7 @@ def send_drone_data(request):
                                       ).first()
             region.status = "RE"
             region.save()
-            new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults = {"region":region, "timestamp":datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)})
+            new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults = {"region":region, "timestamp":datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)})
             new_pinor.save()
             new_event = Event(event_type='POI', headline="Found a stranded person", text="Found a stranded person at %f N %f W" % (pinor.latitude, -pinor.longitude), pinor=new_pinor)
             new_event.save()
