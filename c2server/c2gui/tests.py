@@ -13,10 +13,7 @@ class C2DataTestCase(TestCase):
 
     def test_c2_ext(self):
         region = SearchArea.objects.all()
-        if not region:
-            self.assertTrue(True)
-        else:
-            self.assertFalse(False)
+        self.assertTrue(region)
 """        try:
             xml = schema.parse("test_gpig_xml.xml", True)
         except etree.XMLSyntaxError as err:
