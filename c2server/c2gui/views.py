@@ -51,8 +51,8 @@ def send_search_coord(request):
     bottomleft = Point(latitude=bottomleftlat, longitude=bottomleftlon, altitude=0)
     topright = Point(latitude=toprightlat, longitude=toprightlon, altitude=0)
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
-    c = Communicator()
-    c.send(mes)
+    #c = Communicator()
+    #c.send(mes)
     return HttpResponse(simplejson.dumps({"ids": ids, "headline": new_event.headline, "text": new_event.text, "timestamp": {"year": new_event.timestamp.year,
                               "month": new_event.timestamp.month,
                               "day": new_event.timestamp.day,
@@ -63,8 +63,9 @@ def send_search_coord(request):
 
 def get_all_regions_status(request):
     Event.objects.update(is_new=False)
-    data = list(SearchArea.objects.values('id', 'status'))
-    return HttpResponse(simplejson.dumps({"statuses": data}), content_type='application/json')
+    data = list(SearchArea.objects.values('id', 'status', 'lat', 'lon'))
+    pinors = list(Pinor.objects.values('lat', 'lon'))
+    return HttpResponse(simplejson.dumps({"statuses": data, "pinors": pinors, "width": REG_WIDTH, "height": REG_HEIGHT}), content_type='application/json')
 
 @csrf_exempt
 def send_drone_data(request):
@@ -76,8 +77,8 @@ def send_drone_data(request):
         decoded_message = PinorMesh.from_json(json_message)
         for pinor in decoded_message.pinor:
             getcontext().prec = 6
-            lat = Decimal(pinor.latitude)
-            lon = Decimal(pinor.longitude)
+            lat = Decimal(pinor.latitude) + Decimal(0)
+            lon = Decimal(pinor.longitude) + Decimal(0)
             region = SearchArea.objects.filter(lat__lte=lat
                                       ).filter(lat__gte=lat-REG_HEIGHT
                                       ).filter(lon__gte=lon-REG_WIDTH
@@ -122,4 +123,4 @@ def retrieve_new_data(request):
     drones = Drone.objects.all()
     drone_serializer = DroneSerializer(drones, many=True)
     drones_list = drone_serializer.data
-    return HttpResponse(simplejson.dumps({"new_events": new_event_list, "drones": drones_list}), content_type='application/json')
+    return HttpResponse(simplejson.dumps({"new_events": new_event_list, "drones": drones_list, "height": REG_HEIGHT, "width": REG_WIDTH}), content_type='application/json')

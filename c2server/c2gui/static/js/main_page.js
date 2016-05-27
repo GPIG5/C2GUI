@@ -1,31 +1,102 @@
+var drawingManager;
+var all_overlays = new Object;
+var selectedShape;
+var map;
+
+function deleteSelectedShape() {
+  if (selectedShape) {
+    selectedShape.setMap(null);
+    selectedShape = null;
+  }
+}
+
+function initialize() {
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 13,
+    center: {lat: 53.960667, lng: -1.083338},
+    mapTypeId: google.maps.MapTypeId.SATELLITE,
+    zoomControl: true,
+    streetViewControl: false
+  });
+
+  drawingManager = new google.maps.drawing.DrawingManager({
+    drawingMode: google.maps.drawing.OverlayType.RECTANGLE,
+    drawingControl: true,
+    drawingControlOptions: {
+      position: google.maps.ControlPosition.TOP_CENTER,
+      drawingModes: [
+        google.maps.drawing.OverlayType.RECTANGLE
+      ]
+    }
+  });
+  drawingManager.setMap(map);
+
+  $.ajax({
+      url: 'get_all_regions_status',
+      data: {},
+      success: function(data) {
+        let regionStatuses = data.statuses;
+        let regHeight = data.height;
+        let regWidth = data.width;
+        let pinors = data.pinors;
+        for (let region of regionStatuses) {
+          var regionOptions;
+          if (region.status === 'DD') {
+            regionOptions = {"fillColor": "yellow", "strokeWeight": 0};
+          } else if (region.status === 'RE') {
+            regionOptions = {"fillColor": "red", "strokeWeight": 0};
+          } else if (region.status === 'NRE') {
+            regionOptions = {"fillColor": "green", "strokeWeight": 0};
+          }
+          if (region.status !== 'NE') {
+            var rectangle = new google.maps.Rectangle({
+              map: map,
+              bounds: {
+               north: region.lat + regHeight,
+               south: region.lat,
+               east: region.lon + regWidth,
+               west: region.lon
+              },
+              clickable: false
+            });
+            rectangle.setOptions(regionOptions);
+            all_overlays[region.id] = rectangle;
+          }
+        }
+        for (let pinor of pinors) {
+          var marker = new google.maps.Marker({
+            position: {lat: pinor.lat, lng: pinor.lon},
+            map: map,
+            title: 'Person in Need',
+            clickable: true
+          });
+        }
+      }
+    });
+
+  google.maps.event.addListener(drawingManager, 'rectanglecomplete', function(rectangle) {
+                document.getElementById("bottomleftlat").value = rectangle.bounds.H.H;
+                document.getElementById("bottomleftlon").value = rectangle.bounds.j.j;
+                document.getElementById("toprightlat").value = rectangle.bounds.H.j;
+                document.getElementById("toprightlon").value = rectangle.bounds.j.H;
+                drawingManager.setDrawingMode(null);
+                selectedShape = rectangle;
+              });
+
+  google.maps.event.addListener(map, 'click', deleteSelectedShape);
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
 $( document ).ready(function() {
-    var min_lat = 53.929472;
-    var max_lat = 54.007111;
-    var min_lon = -1.165084;
-    var max_lon = -1.004663;
-    var lat_range = max_lat - min_lat;
-    var lon_range = max_lon - min_lon;
-    var map_left_x = $("#map").offset().left;
-    var map_right_x = map_left_x + $("#map").width();
-    var map_top_y = $("#map").offset().top;
-    var map_bottom_y = map_top_y + $("#map").height();
-    var map_left_offset = $("#map").offset().left;
-    var map_width = $("#map").width();
-    var map_height = $("#map").height();
-
-    $('#map').on('dragstart', function(event) {event.preventDefault(); });
-    $('#map').on('mousedown', function(event) {event.preventDefault(); });
-
     (function periodic_worker() {
       $.ajax({
         url: 'retrieve_new_data',
         success: function(data) {
+          console.log(data);
           let new_events = data.new_events;
-          console.log(new_events);
-          let drones = data.drones;
-          for (let drone of drones) {
-              calculateDroneImageCoordinates(drone);
-          }
+          let regHeight = data.height;
+          let regWidth = data.width;
 
           for (let new_event of new_events) {
               event_date = new Date(new_event.timestamp);
@@ -48,18 +119,35 @@ $( document ).ready(function() {
               timeline.add(ev);
               console.log(new_event);
               if (new_event.pinor) {
-                  if (new_event.pinor.region.status === "RE"){
-                      $("#region" + new_event.pinor.region.id).css({"background-color": "red", "opacity": 0.4});
-                  } else if (new_event.pinor.region.status === "DD"){
-                      $("#region" + new_event.pinor.region.id).css({"background-color": "yellow", "opacity": 0.4});
-                  } else if (new_event.pinor.region.status === "NRE"){
-                      $("#region" + new_event.pinor.region.id).css({"background-color": "green", "opacity": 0.4});
-                  }
+                  var marker = new google.maps.Marker({
+                      position: {lat: parseFloat(new_event.pinor.lat), lng: parseFloat(new_event.pinor.lon)},
+                      title: 'Person in Need',
+                      clickable: true,
+                      animation: google.maps.Animation.DROP
+                  });
+                  marker.setMap(map);
+
               }
               if (new_event.regions.length > 0) {
                   if (new_event.event_type === "CS"){
                       for (let region of new_event.regions) {
-                          $("#region" + region.id).css({"background-color": "green", "opacity": 0.4});
+                          var rectangle;
+                          if (!all_overlays.hasOwnProperty(region.id)) {
+                            rectangle = new google.maps.Rectangle({
+                              map: map,
+                              bounds: {
+                                north: parseFloat(region.lat + regHeight),
+                                south: parseFloat(region.lat),
+                                east: parseFloat(region.lon + regWidth),
+                                west: parseFloat(region.lon)
+                              },
+                              clickable: false
+                            });
+                            all_overlays[region.id] = rectangle;
+                          } else {
+                            rectangle = all_overlays[region.id];
+                          }
+                          rectangle.setOptions({"fillColor": "green", "strokeWeight": 0});
                       }
                   }
               }
@@ -77,9 +165,12 @@ $( document ).ready(function() {
 
     $(document).on('submit', '#coordForm', function(e)
     {
+        if (selectedShape) {
+          selectedShape.set('fillColor', "yellow");
+          selectedShape.set('strokeWeight', 0);
+          selectedShape = null;
+        }
         e.preventDefault();
-        $(".ghost-select").removeClass("ghost-active");
-        $(".ghost-select").width(0).height(0);
         var str = $(this).serialize();
         $.ajax({
 
@@ -116,143 +207,5 @@ $( document ).ready(function() {
         form.reset();
       });
 
-    $("#mapContainer").mousedown(function (e) {
-        $(".ghost-select").width(0).height(0);
-        $(".ghost-select").addClass("ghost-active");
-        $(".ghost-select").css({
-            'left': e.pageX - $("#map").offset().left,
-            'top': e.pageY - $("#map").offset().top
-        });
-
-        initialW = e.pageX;
-        initialH = e.pageY;
-
-        $(document).bind("mouseup", selectElements);
-        $(document).bind("mousemove", openSelector);
-    });
-
-    function selectElements(e) {
-        $(document).unbind("mousemove", openSelector);
-        $(document).unbind("mouseup", selectElements);
-        var $selection = $(".ghost-select");
-        var height = $selection.height();
-        var width = $selection.width();
-        var left_x = $selection.offset().left;
-        var right_x = left_x + $selection.width();
-        var top_y = $selection.offset().top;
-        var bottom_y = top_y + $selection.height();
-        var bottomleftlat = max_lat - lat_range*((bottom_y - map_top_y)/map_height);
-        var bottomleftlon = min_lon + lon_range*((left_x - map_left_x)/map_width);
-        var toprightlat = max_lat - lat_range*((top_y - map_top_y)/map_height);
-        var toprightlon = min_lon + lon_range*((right_x - map_left_x)/map_width);
-        
-        document.getElementById("bottomleftlat").value = bottomleftlat;
-        document.getElementById("bottomleftlon").value = bottomleftlon;
-        document.getElementById("toprightlat").value = toprightlat;
-        document.getElementById("toprightlon").value = toprightlon;
-
-    }
-
-    function doObjectsCollide(a, b) {
-        var aTop = a.offset().top;
-        var aLeft = a.offset().left;
-        var bTop = b.offset().top;
-        var bLeft = b.offset().left;
-
-        return !(
-            ((aTop + a.height()) < (bTop)) ||
-            (aTop > (bTop + b.height())) ||
-            ((aLeft + a.width()) < bLeft) ||
-            (aLeft > (bLeft + b.width()))
-        );
-    }
-
-    function checkMaxMinPos(a, b, aW, aH, bW, bH, maxX, minX, maxY, minY) {
-        'use strict';
-
-        if (a.left < b.left) {
-            if (a.left < minX) {
-                minX = a.left;
-            }
-        } else {
-            if (b.left < minX) {
-                minX = b.left;
-            }
-        }
-
-        if (a.left + aW > b.left + bW) {
-            if (a.left > maxX) {
-                maxX = a.left + aW;
-            }
-        } else {
-            if (b.left + bW > maxX) {
-                maxX = b.left + bW;
-            }
-        }
-
-        if (a.top < b.top) {
-            if (a.top < minY) {
-                minY = a.top;
-            }
-        } else {
-            if (b.top < minY) {
-                minY = b.top;
-            }
-        }
-
-        if (a.top + aH > b.top + bH) {
-            if (a.top > maxY) {
-                maxY = a.top + aH;
-            }
-        } else {
-            if (b.top + bH > maxY) {
-                maxY = b.top + bH;
-            }
-        }
-
-        return {
-            'maxX': maxX,
-            'minX': minX,
-            'maxY': maxY,
-            'minY': minY
-        };
-    }
-
-    function openSelector(e) {
-        var w = Math.abs(initialW - e.pageX);
-        var h = Math.abs(initialH - e.pageY);
-
-        $(".ghost-select").css({
-            'width': w,
-            'height': h
-        });
-        if (e.pageX <= initialW && e.pageY >= initialH) {
-            $(".ghost-select").css({
-                'left': e.pageX - $("#map").offset().left
-            });
-        } else if (e.pageY <= initialH && e.pageX >= initialW) {
-            $(".ghost-select").css({
-                'top': e.pageY - $("#map").offset().top
-            });
-        } else if (e.pageY < initialH && e.pageX < initialW) {
-            $(".ghost-select").css({
-                "left": e.pageX - $("#map").offset().left,
-                "top": e.pageY - $("#map").offset().top
-            });
-        }
-    }
-
-    function calculateDroneImageCoordinates(drone) {
-        left_offset = (drone.lon - min_lon)/(max_lon - min_lon)*map_width;
-        top_offset = (max_lat - drone.lat)/(max_lat - min_lat)*map_height;
-        if ($("#drone" + drone.uid).length == 0) {
-            $("#drone-container").append("<img class='drone' id='drone" + drone.uid + "' src='/static/img/drone.png'>");
-        }
-        $("#drone" + drone.uid).css({"left": left_offset, "top": top_offset});
-    }
 
 });
-
-var colourAllTiles = function() {
-    
-}
