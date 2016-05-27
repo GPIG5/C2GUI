@@ -82,7 +82,6 @@ def send_drone_data(request):
             lon = Decimal(pinor.longitude)
             time_stamp = datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)
             save_new_pinor(lat, lon, time_stamp)
-
     elif json_message["data"]["datatype"] == "status":
         decoded_message = StatusMesh.from_json(json_message)
         drone, created = Drone.objects.update_or_create(uid=decoded_message.uuid,
