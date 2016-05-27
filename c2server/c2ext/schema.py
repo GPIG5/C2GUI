@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 #
-# Generated Thu May 26 17:20:24 2016 by generateDS.py version 2.22b.
+# Generated Fri May 27 17:15:47 2016 by generateDS.py version 2.22b.
 #
 # Command line options:
 #   ('-o', 'schema.py')
@@ -32,11 +32,7 @@ def parsexml_(infile, parser=None, **kwargs):
     if parser is None:
         # Use the lxml ElementTree compatible parser so that, e.g.,
         #   we ignore comments.
-        with open('c2ext\gpig.xsd', 'rb') as file:
-            schema_str = file.read()
-        schema_root = etree_.XML(schema_str)
-        schema = etree_.XMLSchema(schema_root)
-        parser = etree_.ETCompatXMLParser(schema=schema)
+        parser = etree_.ETCompatXMLParser()
     doc = etree_.parse(infile, parser=parser, **kwargs)
     return doc
 
@@ -104,7 +100,7 @@ except ImportError as exp:
             return values
 
         def gds_format_float(self, input_data, input_name=''):
-            return ('%.15f' % input_data).rstrip('0')
+            return ('%.6f' % input_data).rstrip('0')
 
         def gds_validate_float(self, input_data, node=None, input_name=''):
             return input_data
@@ -751,7 +747,7 @@ class gpigData(GeneratedsSuper):
         else:
             return False
 
-    def export(self, outfile, level, namespace_='', name_='gpigData', namespacedef_='', pretty_print=True):
+    def export(self, outfile, level, namespace_='', name_='gpigdata', namespacedef_='', pretty_print=True):
         if pretty_print:
             eol_ = '\n'
         else:
@@ -1013,7 +1009,7 @@ class point(position):
 
     def __init__(self, position=None):
         self.original_tagname_ = None
-        super(point, self).__init__()
+        super(point, self).__init__("point")
         self.position = position
 
     def factory(*args_, **kwargs_):
@@ -1206,7 +1202,7 @@ class boundingBox(position):
 
     def __init__(self, topleft=None, topright=None):
         self.original_tagname_ = None
-        super(boundingBox, self).__init__()
+        super(boundingBox, self).__init__("boundingBox")
         self.topleft = topleft
         self.topright = topright
 
@@ -1313,7 +1309,7 @@ class polar(position):
 
     def __init__(self, point=None, radius=None):
         self.original_tagname_ = None
-        super(polar, self).__init__()
+        super(polar, self).__init__("polar")
         self.point = point
         self.radius = radius
 
@@ -1424,7 +1420,7 @@ class poly(position):
 
     def __init__(self, coords=None):
         self.original_tagname_ = None
-        super(poly, self).__init__()
+        super(poly, self).__init__("poly")
         if coords is None:
             self.coords = []
         else:
@@ -1700,7 +1696,7 @@ class blockage(dataType):
 
     def __init__(self, image=None):
         self.original_tagname_ = None
-        super(blockage, self).__init__()
+        super(blockage, self).__init__("blockage")
         self.image = image
 
     def factory(*args_, **kwargs_):
@@ -1874,7 +1870,7 @@ class delivery(dataType):
 
     def __init__(self):
         self.original_tagname_ = None
-        super(delivery, self).__init__()
+        super(delivery, self).__init__("delivery")
 
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:
@@ -1947,7 +1943,7 @@ class depth(dataType):
 
     def __init__(self, depth_member=None):
         self.original_tagname_ = None
-        super(depth, self).__init__()
+        super(depth, self).__init__("depth")
         self.depth = depth_member
 
     def factory(*args_, **kwargs_):
@@ -2043,7 +2039,7 @@ class flow(dataType):
 
     def __init__(self, flow_member=None):
         self.original_tagname_ = None
-        super(flow, self).__init__()
+        super(flow, self).__init__("flow")
         self.flow = flow_member
 
     def factory(*args_, **kwargs_):
@@ -2139,7 +2135,7 @@ class gate(dataType):
 
     def __init__(self, position=None):
         self.original_tagname_ = None
-        super(gate, self).__init__()
+        super(gate, self).__init__("gate")
         self.position = position
 
     def factory(*args_, **kwargs_):
@@ -2235,7 +2231,7 @@ class strandedPerson(dataType):
 
     def __init__(self, image=None):
         self.original_tagname_ = None
-        super(strandedPerson, self).__init__()
+        super(strandedPerson, self).__init__("strandedPerson")
         self.image = image
 
     def factory(*args_, **kwargs_):
@@ -2328,7 +2324,7 @@ class waterEdge(dataType):
 
     def __init__(self):
         self.original_tagname_ = None
-        super(waterEdge, self).__init__()
+        super(waterEdge, self).__init__("waterEdge")
 
     def factory(*args_, **kwargs_):
         if CurrentSubclassModule_ is not None:

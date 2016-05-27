@@ -14,7 +14,7 @@ class C2DataTestCase(TestCase):
     def test_c2_ext(self):
         region = SearchArea.objects.all()
         self.assertTrue(region)
-"""        try:
+        try:
             xml = schema.parse("test_gpig_xml.xml", True)
         except etree.XMLSyntaxError as err:
             print("XMLSyntaxError {0}".format(err))
@@ -23,9 +23,12 @@ class C2DataTestCase(TestCase):
         pinors = _get_pinors_from_xml(xml)
         _update_db(pinors)
         xml_str = create_xml_for_ext_c2()
-        with open('test_gpig_xml.xml', 'r') as myfile:
+
+        with open("test_gpig_xml_out.xml", "w") as myfile:
+            myfile.write(xml_str)
+        with open("test_gpig_xml.xml", "r") as myfile:
             orig = myfile.read()
-            self.assertEqual(orig, xml_str)"""
+            self.assertEqual(orig, xml_str)
 
 
 

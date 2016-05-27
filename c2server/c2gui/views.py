@@ -107,22 +107,26 @@ def send_drone_data(request):
     return HttpResponse("received data")
 
 def save_new_pinor(lat, lon, timestamp):
-    region = SearchArea.objects.filter(lat__lte=lat
-                                       ).filter(lat__gte=lat - REG_HEIGHT
-                                                ).filter(lon__gte=lon - REG_WIDTH
-                                                         ).filter(lon__lte=lon
-                                                                  ).first()
+    region = SearchArea.objects.filter(lat__lte=lat)\
+        .filter(lat__gte=lat - REG_HEIGHT)\
+        .filter(lon__gte=lon - REG_WIDTH)\
+        .filter(lon__lte=lon)\
+        .first()
+
     if not region:
         return
+
     region.status = "RE"
-    region.save()
+
     new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults={"region": region,
                                                                                  "timestamp": timestamp})
-    new_pinor.save()
-    new_event = Event(event_type='POI', headline="Found a stranded person",
-                  text="Found a stranded person at %f N %f W" % (lat, -lon),
-                  pinor=new_pinor)
-    new_event.save()
+    if created:
+        region.save()
+        new_pinor.save()
+        new_event = Event(event_type='POI', headline="Found a stranded person",
+                      text="Found a stranded person at %f N %f W" % (lat, -lon),
+                      pinor=new_pinor)
+        new_event.save()
 
 def retrieve_new_data(request):
     new_events = Event.objects.filter(is_new=True)
@@ -139,7 +143,7 @@ def retrieve_new_data(request):
     drones_list = drone_serializer.data
     return HttpResponse(simplejson.dumps({"new_events": new_event_list, "drones": drones_list}),
                         content_type='application/json')
-@csrf_exempt
+
 def send_c2_data(request):
     from c2ext.c2_data import create_xml_for_ext_c2
     print("received c2 data request")

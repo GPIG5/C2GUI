@@ -2,9 +2,9 @@
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',# or 'django.db.backends.sqlite3' if you are using sqlite,
-        'NAME': 'postgres', # the name of the database,
+        'NAME': 'progress', # the name of the database,
         'USER': 'postgres', # the name of the user
-        'PASSWORD': 'hoo', # the password of the user
+        'PASSWORD': 'huw', # the password of the user
         'HOST': '127.0.0.1', # the database host
         'PORT': '5432', # the database port
     }
