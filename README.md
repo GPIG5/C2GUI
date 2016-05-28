@@ -1,5 +1,7 @@
 All python packages required for running the server can be found in c2server/requirements.txt.
 
+The details of the database that you are going to use should be put into the file c2server/user_settings.py. This file is personal to everyone and therefore should not be commited. 
+
 Before you run the server for the first time, you need to initialise a database using the following commands:
 $ python3 manage.py makemigrations
 $ python3 manage.py migrate
