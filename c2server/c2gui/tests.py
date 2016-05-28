@@ -9,7 +9,7 @@ from lxml import etree
 
 class C2DataTestCase(TestCase):
     def setUp(self):
-        #Pinor.objects.all().delete()
+        Pinor.objects.all().delete()
         # db needs to be populated
         region = SearchArea.objects.all()
         self.assertTrue(region)
