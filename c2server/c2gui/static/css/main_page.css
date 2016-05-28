@@ -80,6 +80,18 @@
     height: 20px;
 }
 
+.pinor {
+    position: relative;
+    width: 15px;
+    height: 15px;
+}
+
+#pinor-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
 #drone-container {
     position: absolute;
     top: 0;

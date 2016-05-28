@@ -243,16 +243,17 @@ $( document ).ready(function() {
     }
 
     function calculateDroneImageCoordinates(drone) {
-        left_offset = (drone.lon - min_lon)/(max_lon - min_lon)*map_width;
-        top_offset = (max_lat - drone.lat)/(max_lat - min_lat)*map_height;
+        offsets = convertCoordinatesToPixels(drone.lat, drone.lon);
         if ($("#drone" + drone.uid).length == 0) {
             $("#drone-container").append("<img class='drone' id='drone" + drone.uid + "' src='/static/img/drone.png'>");
         }
-        $("#drone" + drone.uid).css({"left": left_offset, "top": top_offset});
+        $("#drone" + drone.uid).css({"left": offsets.left_offset, "top": offsets.top_offset});
+    }
+
+    function convertCoordinatesToPixels(lat, lon) {
+        left_offset = (lon - min_lon)/(max_lon - min_lon)*map_width;
+        top_offset = (max_lat - lat)/(max_lat - min_lat)*map_height;
+        return {"left_offset": left_offset, "top_offset": top_offset};
     }
 
 });
-
-var colourAllTiles = function() {
-    
-}

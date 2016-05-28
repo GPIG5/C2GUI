@@ -8,7 +8,7 @@ from .communicator import Communicator
 from .utils import *
 from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
-from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh
+from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh, UploadDirect
 from .point import Point, Space
 
 from decimal import *
@@ -20,6 +20,7 @@ import geopy.distance
 import logging
 import datetime
 import pytz
+import tarfile
 logging.basicConfig(filename='access.log', level=logging.DEBUG)
 
 
@@ -63,8 +64,9 @@ def send_search_coord(request):
 
 def get_all_regions_status(request):
     Event.objects.update(is_new=False)
-    data = list(SearchArea.objects.values('id', 'status'))
-    return HttpResponse(simplejson.dumps({"statuses": data}), content_type='application/json')
+    search_areas = list(SearchArea.objects.values('id', 'status'))
+    pinors = list(Pinor.objects.values('id', 'lon', 'lat'))
+    return HttpResponse(simplejson.dumps({"statuses": search_areas, "pinors": pinors}), content_type='application/json')
 
 @csrf_exempt
 def send_drone_data(request):
@@ -76,8 +78,8 @@ def send_drone_data(request):
         decoded_message = PinorMesh.from_json(json_message)
         for pinor in decoded_message.pinor:
             getcontext().prec = 6
-            lat = Decimal(pinor.latitude)
-            lon = Decimal(pinor.longitude)
+            lat = Decimal(pinor.latitude) + Decimal(0)
+            lon = Decimal(pinor.longitude) + Decimal(0)
             region = SearchArea.objects.filter(lat__lte=lat
                                       ).filter(lat__gte=lat-REG_HEIGHT
                                       ).filter(lon__gte=lon-REG_WIDTH
@@ -85,7 +87,7 @@ def send_drone_data(request):
                                       ).first()
             region.status = "RE"
             region.save()
-            new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults = {"region":region, "timestamp":datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)})
+            new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults = {"region":region, "timestamp":datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)})
             new_pinor.save()
             new_event = Event(event_type='POI', headline="Found a stranded person", text="Found a stranded person at %f N %f W" % (pinor.latitude, -pinor.longitude), pinor=new_pinor)
             new_event.save()
@@ -107,6 +109,12 @@ def send_drone_data(request):
         new_event = Event(event_type='CS', headline="Completed search", text="Completed search at the area (%f N, %f W):(%f N, %f W)" % (bottomleftlat, -bottomleftlon, toprightlat, -toprightlon,))
         new_event.save()
         new_event.regions.add(*list(areasComplete))
+    elif json_message["data"]["datatype"] == "upload":
+        decoded_message = UploadDirect.from_json(json_message)
+        tar = tarfile.open(fileobj=decoded_message.images)
+        tarmembers = tar.getmembers()
+        for member in tarmembers:
+            print(member.isfile())
     return HttpResponse("received data")
 
 def retrieve_new_data(request):
