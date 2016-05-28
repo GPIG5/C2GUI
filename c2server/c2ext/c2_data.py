@@ -8,10 +8,11 @@ from c2gui.views import save_new_pinor
 from decimal import Decimal
 
 
-def get_updates_from_ext_c2s(url):
+def get_updates_from_ext_c2s(url, clear_table=False):
     """
     Queries all servers from in url_list for data, updates db with new information
     :param url: remote server
+    :param clear_table: clear the pinor table before updating
     :return: nothing
     """
     xml_str = _request_data(url)
@@ -23,6 +24,8 @@ def get_updates_from_ext_c2s(url):
         print("XMLSyntaxError from url " + url + " : {0}".format(err))
         return
     pinors = _get_pinors_from_xml(xml)
+    if clear_table:
+        Pinor.objects.all().delete()
     _update_db(pinors)
 
 
@@ -48,7 +51,7 @@ def _request_data(url):
         print("received response " + resp.status_code + "from URL " + url)
         return
 
-    if not resp.headers == "application/xml":
+    if not resp.headers.get("Content-Type") == "application/xml":
         print("received incorrect header " + resp.headers + "from URL " + url)
         return
 
