@@ -1,3 +1,6 @@
+import binascii
+
+import io
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
@@ -109,12 +112,20 @@ def send_drone_data(request):
         new_event = Event(event_type='CS', headline="Completed search", text="Completed search at the area (%f N, %f W):(%f N, %f W)" % (bottomleftlat, -bottomleftlon, toprightlat, -toprightlon,))
         new_event.save()
         new_event.regions.add(*list(areasComplete))
+
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
-        tar = tarfile.open(fileobj=decoded_message.images)
-        tarmembers = tar.getmembers()
-        for member in tarmembers:
-            print(member.isfile())
+        binary_data = binascii.a2b_base64(decoded_message.images)
+        file_object = io.BytesIO(binary_data)
+        tar = tarfile.open(fileobj=file_object)
+        tar_members = tar.getmembers()
+        print("Number of files: " + str(len(tar_members)))
+        for member in tar_members:
+            if member.name[-4:] == ".csv":
+                print("Found the csv! " + member.name)
+
+        # for member in tarmembers:
+        #     print(member.isfile())
     return HttpResponse("received data")
 
 def retrieve_new_data(request):
