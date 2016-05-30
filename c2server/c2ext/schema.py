@@ -32,7 +32,11 @@ def parsexml_(infile, parser=None, **kwargs):
     if parser is None:
         # Use the lxml ElementTree compatible parser so that, e.g.,
         #   we ignore comments.
-        parser = etree_.ETCompatXMLParser()
+        with open("c2ext/gpig.xsd", "rb") as file:
+            schema_str = file.read()
+            schema_root = etree_.XML(schema_str)
+            schema = etree_.XMLSchema(schema_root)
+            parser = etree_.ETCompatXMLParser(schema=schema)
     doc = etree_.parse(infile, parser=parser, **kwargs)
     return doc
 
@@ -2430,8 +2434,8 @@ def parse(inFileName, silence=False):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'blockage'
-        rootClass = blockage
+        rootTag = 'gpigdata'
+        rootClass = gpigData
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -2451,8 +2455,8 @@ def parseEtree(inFileName, silence=False):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'blockage'
-        rootClass = blockage
+        rootTag = 'gpigdata'
+        rootClass = gpigData
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -2476,8 +2480,8 @@ def parseString(inString, silence=False):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'blockage'
-        rootClass = blockage
+        rootTag = 'gpigdata'
+        rootClass = gpigData
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
@@ -2496,8 +2500,8 @@ def parseLiteral(inFileName, silence=False):
     rootNode = doc.getroot()
     rootTag, rootClass = get_root_tag(rootNode)
     if rootClass is None:
-        rootTag = 'blockage'
-        rootClass = blockage
+        rootTag = 'gpigdata'
+        rootClass = gpigData
     rootObj = rootClass.factory()
     rootObj.build(rootNode)
     # Enable Python to collect the space used by the DOM.
