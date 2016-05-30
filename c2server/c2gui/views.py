@@ -79,8 +79,8 @@ def send_drone_data(request):
         decoded_message = PinorMesh.from_json(json_message)
         for pinor in decoded_message.pinor:
             getcontext().prec = 6
-            lat = Decimal(pinor.latitude)
-            lon = Decimal(pinor.longitude)
+            lat = Decimal(pinor.latitude) + Decimal(0)
+            lon = Decimal(pinor.longitude) + Decimal(0)
             time_stamp = datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)
             save_new_pinor(lat, lon, time_stamp)
     elif json_message["data"]["datatype"] == "status":
