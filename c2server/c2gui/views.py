@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 
-from c2server.c2gui import utils
+from . import utils
 from .communicator import Communicator
 from .utils import *
 from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer, PinorSerializer
