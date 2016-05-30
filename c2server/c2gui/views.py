@@ -9,7 +9,7 @@ from django.core import serializers
 
 from .communicator import Communicator
 from .utils import *
-from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer
+from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer, PinorSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
 from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh, UploadDirect
 from .point import Point, Space
@@ -70,15 +70,17 @@ def send_search_coord(request):
 def get_all_regions_status(request):
     Event.objects.update(is_new=False)
     data = list(SearchArea.objects.values('id', 'status', 'lat', 'lon'))
-    pinors = list(Pinor.objects.values('lat', 'lon'))
-    return HttpResponse(simplejson.dumps({"statuses": data, "pinors": pinors, "width": REG_WIDTH, "height": REG_HEIGHT}), content_type='application/json')
+    pinors = Pinor.objects.all()
+    pinor_serializer = PinorSerializer(pinors, many=True)
+   
+    return HttpResponse(simplejson.dumps({"statuses": data, "pinors": pinor_serializer.data, "width": REG_WIDTH, "height": REG_HEIGHT}), content_type='application/json')
 
 @csrf_exempt
 def send_drone_data(request):
     unicode_message = request.body.decode("utf-8")
     # print(unicode_message)
     json_message = json.loads(unicode_message)
-    logging.debug(json_message)
+    #logging.debug(json_message)
     if json_message["data"]["datatype"] == "pinor":
         decoded_message = PinorMesh.from_json(json_message)
         for pinor in decoded_message.pinor:
@@ -115,6 +117,7 @@ def send_drone_data(request):
         file_object = io.BytesIO(binary_data)
         tar = tarfile.open(fileobj=file_object)
         tar_members = tar.getmembers()
+        tar.extractall("/tmp")
         print("Number of files: " + str(len(tar_members)))
         for member in tar_members:
             if member.name[-4:] == ".csv":

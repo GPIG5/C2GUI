@@ -36,9 +36,10 @@ class Pinor(models.Model):
     lon = models.DecimalField(max_digits=8, decimal_places=6)
     region = models.ForeignKey('SearchArea', on_delete=models.CASCADE)
     timestamp = models.DateTimeField()
+    origin = models.CharField(max_length=1, choices=(('M', 'My Team'), ('O', 'Other Team'), ), default='M')
 
     class Meta:
-        unique_together = ('lat', 'lon',)
+        unique_together = ('lat', 'lon')
 
 class Drone(models.Model):
     uid = models.CharField(max_length=36, primary_key=True)
@@ -46,8 +47,13 @@ class Drone(models.Model):
     lon = models.DecimalField(max_digits=8, decimal_places=6)
     last_communication = models.DateTimeField(auto_now=True)
 
-##### Custom Serializers #####
+class Image(models.Model):
+    photo = models.ImageField(upload_to='drone-images')
+    lat = models.DecimalField(max_digits=8, decimal_places=6)
+    lon = models.DecimalField(max_digits=8, decimal_places=6)
+    pinor = models.ForeignKey('Pinor', on_delete=models.CASCADE, blank=True, null=True)
 
+##### Custom Serializers #####
 class RegionSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchArea
@@ -56,7 +62,7 @@ class RegionSerializer(serializers.ModelSerializer):
 class PinorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pinor
-        fields = ('pk', 'lat', 'lon', 'region')
+        fields = ('pk', 'lat', 'lon', 'timestamp')
         depth = 1
 
 class EventSerializer(serializers.ModelSerializer):

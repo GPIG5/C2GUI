@@ -119,6 +119,9 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
+MEDIA_ROOT = "/tmp/"
+
+MEDIA_URL = '/media/'
 # Celery configuration
 #BROKER_URL = 'redis://localhost:6379/0'
 

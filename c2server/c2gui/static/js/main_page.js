@@ -1,7 +1,14 @@
+var dateTimeOptions = {
+  weekday: "long", year: "numeric", month: "short",
+  day: "numeric", hour: "2-digit", minute: "2-digit"
+};
 var drawingManager;
 var all_overlays = new Object;
 var selectedShape;
 var map;
+var infowindow = null;
+var markers = [];
+var lastMarker = 0;
 
 function deleteSelectedShape() {
   if (selectedShape) {
@@ -17,6 +24,10 @@ function initialize() {
     mapTypeId: google.maps.MapTypeId.SATELLITE,
     zoomControl: true,
     streetViewControl: false
+  });
+
+  infowindow = new google.maps.InfoWindow({
+    content: "holding..."
   });
 
   drawingManager = new google.maps.drawing.DrawingManager({
@@ -64,11 +75,29 @@ function initialize() {
           }
         }
         for (let pinor of pinors) {
+          var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
+          var contentString = '<div class="content">' +
+            'Detected on ' + timeString +
+            ' at the location (' + pinor.lat + ' N, ' +
+            (-pinor.lon) + ' W).' +
+            '</div>';
+
           var marker = new google.maps.Marker({
-            position: {lat: pinor.lat, lng: pinor.lon},
+            position: {lat: parseFloat(pinor.lat), lng: parseFloat(pinor.lon)},
             map: map,
             title: 'Person in Need',
-            clickable: true
+            clickable: true,
+            html: contentString
+          });
+          markers.push(marker);        
+        }
+        lastMarker = markers.length;
+
+        for (var i = 0; i < markers.length; i++) {
+          var marker = markers[i];
+          google.maps.event.addListener(marker, 'click', function() {
+            infowindow.setContent(this.html);
+            infowindow.open(map, this);
           });
         }
       }
@@ -93,7 +122,6 @@ $( document ).ready(function() {
       $.ajax({
         url: 'retrieve_new_data',
         success: function(data) {
-          console.log(data);
           let new_events = data.new_events;
           let regHeight = data.height;
           let regWidth = data.width;
@@ -117,16 +145,23 @@ $( document ).ready(function() {
                   }
               };
               timeline.add(ev);
-              console.log(new_event);
               if (new_event.pinor) {
+                  var pinor = new_event.pinor;
+                  var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
+                  var contentString = '<div class="content">' +
+                    'Detected on ' + timeString +
+                    ' at the location (' + pinor.lat + ' N, ' +
+                    (-pinor.lon) + ' W).' +
+                    '</div>';
                   var marker = new google.maps.Marker({
                       position: {lat: parseFloat(new_event.pinor.lat), lng: parseFloat(new_event.pinor.lon)},
                       title: 'Person in Need',
                       clickable: true,
-                      animation: google.maps.Animation.DROP
+                      animation: google.maps.Animation.DROP,
+                      html: contentString
                   });
                   marker.setMap(map);
-
+                  markers.push(marker);
               }
               if (new_event.regions.length > 0) {
                   if (new_event.event_type === "CS"){
@@ -152,6 +187,14 @@ $( document ).ready(function() {
                   }
               }
           }
+          for (var i = lastMarker; i < markers.length; i++) {
+            var marker = markers[i];
+            google.maps.event.addListener(marker, 'click', function() {
+              infowindow.setContent(this.html);
+              infowindow.open(map, this);
+            });
+          }
+
           if (new_events.length > 0){
               timeline.goToEnd();
           }
