@@ -6,6 +6,7 @@ from io import StringIO
 from c2gui.models import Pinor
 from c2gui.views import save_new_pinor
 from decimal import Decimal
+from io import BytesIO
 
 
 def get_updates_from_ext_c2s(url, clear_table=False):
@@ -13,20 +14,21 @@ def get_updates_from_ext_c2s(url, clear_table=False):
     Queries all servers from in url_list for data, updates db with new information
     :param url: remote server
     :param clear_table: clear the pinor table before updating
-    :return: nothing
+    :return: list of new pinors
     """
-    xml_str = _request_data(url)
-    if not xml_str:
+    xml_bytes = _request_data(url)
+    if not xml_bytes:
         return
     try:
-        xml = schema.parseString(xml_str, True)
+        xml = schema.parse(BytesIO(xml_bytes), True)
     except etree.XMLSyntaxError as err:
         print("XMLSyntaxError from url " + url + " : {0}".format(err))
         return
-    pinors = _get_pinors_from_xml(xml)
+    pinor_list = _get_pinors_from_xml(xml)
     if clear_table:
         Pinor.objects.all().delete()
-    _update_db(pinors)
+    _update_db(pinor_list)
+    return pinor_list
 
 
 def create_xml_for_ext_c2():
@@ -44,18 +46,19 @@ def create_xml_for_ext_c2():
 def _request_data(url):
     """
     :param url: url of external c2 server
-    :return: xml in string form
+    :return: xml bytes
     """
-    resp = requests.get(url)
+    try:
+        resp = requests.get(url)
+    except requests.exceptions.InvalidSchema:
+        return
+    except requests.exceptions.ConnectionError:
+        return
     if not resp.status_code == 200:
-        print("received response " + resp.status_code + "from URL " + url)
+        print("received response " + resp.status_code + " from URL " + url)
         return
 
-    if not resp.headers.get("Content-Type") == "application/xml":
-        print("received incorrect header " + resp.headers + "from URL " + url)
-        return
-
-    return resp.text
+    return resp.content
 
 
 def _get_pinors_from_xml(xml):
