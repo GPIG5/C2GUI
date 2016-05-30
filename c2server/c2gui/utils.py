@@ -1,4 +1,5 @@
 import base64
+import os
 
 from .communicator import Communicator
 import asyncio
@@ -22,6 +23,8 @@ def decode_file(file_data, filename, path):
 
 
 def decode_file_dictionary(f_dict, root_path):
+    if not os.path.isdir(root_path):
+        os.makedirs(root_path)
     for i in f_dict:
         if type(i) is str:
             decode_file(f_dict[i], i, root_path)
