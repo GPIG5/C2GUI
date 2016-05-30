@@ -1,3 +1,4 @@
+import base64
 import binascii
 
 import io
@@ -7,6 +8,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
 
+from c2server.c2gui import utils
 from .communicator import Communicator
 from .utils import *
 from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer
@@ -111,18 +113,11 @@ def send_drone_data(request):
 
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
-        binary_data = binascii.a2b_base64(decoded_message.images)
-        file_object = io.BytesIO(binary_data)
-        tar = tarfile.open(fileobj=file_object)
-        tar_members = tar.getmembers()
-        print("Number of files: " + str(len(tar_members)))
-        for member in tar_members:
-            if member.name[-4:] == ".csv":
-                print("Found the csv! " + member.name)
+        uuid = decoded_message.uuid
+        utils.decode_file_dictionary(decoded_message.images, "data/" + uuid + "/")
 
-        # for member in tarmembers:
-        #     print(member.isfile())
     return HttpResponse("received data")
+
 
 def save_new_pinor(lat, lon, timestamp):
     region = SearchArea.objects.filter(lat__lte=lat)\
