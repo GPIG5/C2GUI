@@ -12,7 +12,7 @@ from django.core.urlresolvers import reverse
 from . import utils
 from .communicator import Communicator
 from .utils import *
-from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer
+from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer, RegionSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
 from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh, UploadDirect
 from .point import Point, Space
@@ -47,7 +47,7 @@ def send_search_coord(request):
         sa.status = 'DD'
         sa.save()
 
-    ids = list(areasToSearch.values('id'))
+    region_serializer = RegionSerializer(areasToSearch, many=True)
     coordinates = {"bottomleft": {"latitude": bottomleftlat, "longitude": bottomleftlon},
                    "topright": {"latitude": toprightlat, "longitude": toprightlon}
                    }
@@ -61,7 +61,7 @@ def send_search_coord(request):
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
     c = Communicator()
     c.send(mes)
-    return HttpResponse(simplejson.dumps({"ids": ids, "headline": new_event.headline, "text": new_event.text,
+    return HttpResponse(simplejson.dumps({"regions": region_serializer.data, "headline": new_event.headline, "text": new_event.text,
                                           "timestamp": {"year": new_event.timestamp.year,
                                                         "month": new_event.timestamp.month,
                                                         "day": new_event.timestamp.day,
@@ -117,7 +117,7 @@ def send_drone_data(request):
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
         uuid = decoded_message.uuid
-        logging.debug(decoded_message.images)
+        #logging.debug(decoded_message.images)
         utils.decode_file_dictionary(decoded_message.images, "/tmp/" + uuid + "/")
 
 

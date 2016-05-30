@@ -9,6 +9,8 @@ var map;
 var infowindow = null;
 var markers = [];
 var lastMarker = 0;
+var regHeight = 0;
+var regWidth = 0;
 
 function deleteSelectedShape() {
   if (selectedShape) {
@@ -47,11 +49,11 @@ function initialize() {
       data: {},
       success: function(data) {
         let regionStatuses = data.statuses;
-        let regHeight = data.height;
-        let regWidth = data.width;
+        regHeight = parseFloat(data.height);
+        regWidth = parseFloat(data.width);
         let pinors = data.pinors;
         for (let region of regionStatuses) {
-          var regionOptions = {"strokeWeight": 0};
+          var regionOptions = {"strokeWeight": 0, "fillOpacity": 0};
           if (region.status === 'DD') {
             regionOptions = {"fillColor": "yellow", "strokeWeight": 0};
           } else if (region.status === 'NRE') {
@@ -206,11 +208,12 @@ $( document ).ready(function() {
 
     $(document).on('submit', '#coordForm', function(e)
     {
-        if (selectedShape) {
+        /*if (selectedShape) {
           selectedShape.set('fillColor', "yellow");
           selectedShape.set('strokeWeight', 0);
+          selectedShape.set
           selectedShape = null;
-        }
+        }*/
         e.preventDefault();
         var str = $(this).serialize();
         $.ajax({
@@ -219,12 +222,11 @@ $( document ).ready(function() {
           url : 'send_search_coord',
           data : str,
           success : function(data) {
-             let regions = data.ids;
+             let regions = data.regions;
+             deleteSelectedShape();
              for (let region of regions) {
-                 $('#region' + region.id).css({'background-color': 'yellow', 'opacity': 0.4})
-             };
-             var new_event = {
-                "start_date": {
+               var new_event = {
+                 "start_date": {
                     "year": data.timestamp.year,
                     "month": data.timestamp.month,
                     "day": data.timestamp.day,
@@ -233,14 +235,32 @@ $( document ).ready(function() {
                     "second": data.timestamp.second,
                     "millisecond": "",
                     "format": ""
-                },
-                "text": {
+                 },
+                 "text": {
                     "headline": data.headline,
                     "text": data.text
-                }
-             };
-             timeline.add(new_event);
-             timeline.goToEnd();
+                 }
+               };
+               timeline.add(new_event);
+               timeline.goToEnd();
+               var rectangle;
+               if (!all_overlays.hasOwnProperty(region.id)) {
+                 rectangle = new google.maps.Rectangle({
+                   map: map,
+                   bounds: {
+                     north: parseFloat(region.lat + regHeight),
+                     south: parseFloat(region.lat),
+                     east: parseFloat(region.lon + regWidth),
+                     west: parseFloat(region.lon)
+                   },
+                   clickable: false
+                 });
+                 all_overlays[region.id] = rectangle;
+               } else {
+                 rectangle = all_overlays[region.id];
+               }
+               rectangle.setOptions({"fillColor": "yellow", "strokeWeight": 0});
+             }
           }
         });
         
