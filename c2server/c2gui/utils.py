@@ -17,7 +17,7 @@ def connect_and_send(host, data):
 def decode_file(file_data, filename, path):
     file_bytes = bytes(file_data, "utf-8")
     file_contents = base64.b64decode(file_bytes)
-    file_data = open(path + filename, mode="wb")
+    file_data = open(path + "/" + filename, mode="wb")
     file_data.write(file_contents)
     file_data.close()
 
