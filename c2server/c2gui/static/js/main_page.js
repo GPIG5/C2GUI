@@ -75,11 +75,13 @@ function initialize() {
           }
         }
         for (let pinor of pinors) {
+          console.log(pinor);
           var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
           var contentString = '<div class="content">' +
             'Detected on ' + timeString +
             ' at the location (' + pinor.lat + ' N, ' +
-            (-pinor.lon) + ' W).' +
+            (-pinor.lon) + ' W)' +
+            '<br><img src="/c2gui' + pinor.images[0].photo + '">' +
             '</div>';
 
           var marker = new google.maps.Marker({
@@ -208,12 +210,6 @@ $( document ).ready(function() {
 
     $(document).on('submit', '#coordForm', function(e)
     {
-        /*if (selectedShape) {
-          selectedShape.set('fillColor', "yellow");
-          selectedShape.set('strokeWeight', 0);
-          selectedShape.set
-          selectedShape = null;
-        }*/
         e.preventDefault();
         var str = $(this).serialize();
         $.ajax({

@@ -1,7 +1,8 @@
 import base64
 import binascii
-
 import io
+import csv
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, HttpResponseServerError, HttpResponseRedirect
 from django.db.models import Q
@@ -119,7 +120,24 @@ def send_drone_data(request):
         uuid = decoded_message.uuid
         #logging.debug(decoded_message.images)
         utils.decode_file_dictionary(decoded_message.images, "/tmp/" + uuid + "/")
+        with open('/tmp/' + uuid + '/locations.csv') as csvfile:
+            location_reader = csv.DictReader(csvfile)
+            for row in location_reader:
+                getcontext().prec = 6
+                lat = Decimal(row["lat"]) + Decimal(0)
+                lon = Decimal(row["lon"]) + Decimal(0)
+                obj, created = Image.objects.get_or_create(lat=lat, lon=lon, defaults={"photo": "/tmp/images/" + row["img"]}) 
+                obj.save()
 
+        with open('/tmp/' + uuid + '/pinor.csv') as csvfile:
+            pinor_reader = csv.DictReader(csvfile)
+            for row in pinor_reader:
+                lat = Decimal(row["lat"]) + Decimal(0)
+                lon = Decimal(row["lon"]) + Decimal(0)
+                img = Image.objects.get(lat=lat, lon=lon)
+                pinor = Pinor.objects.get(lat=lat, lon=lon)
+                img.pinor = pinor
+                img.save()
 
     return HttpResponse("received data")
 

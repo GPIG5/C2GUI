@@ -51,7 +51,10 @@ class Image(models.Model):
     photo = models.ImageField(upload_to='drone-images')
     lat = models.DecimalField(max_digits=8, decimal_places=6)
     lon = models.DecimalField(max_digits=8, decimal_places=6)
-    pinor = models.ForeignKey('Pinor', on_delete=models.CASCADE, blank=True, null=True)
+    pinor = models.ForeignKey('Pinor', on_delete=models.CASCADE, blank=True, null=True, related_name="images")
+
+    class Meta:
+        unique_together = ('lat', 'lon')
 
 ##### Custom Serializers #####
 class RegionSerializer(serializers.ModelSerializer):
@@ -62,7 +65,7 @@ class RegionSerializer(serializers.ModelSerializer):
 class PinorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pinor
-        fields = ('pk', 'lat', 'lon', 'timestamp')
+        fields = ('pk', 'lat', 'lon', 'timestamp', "images")
         depth = 1
 
 class EventSerializer(serializers.ModelSerializer):

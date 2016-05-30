@@ -2,17 +2,7 @@ import base64
 import os
 
 from .communicator import Communicator
-import asyncio
-
-
-@asyncio.coroutine
-def connect_and_send(host, data):
-    c = Communicator.Communicator()
-    yield from c.connect(host)
-    print("connected")
-    yield from c.send(data)
-    print("sent")
-
+from .models import Image
 
 def decode_file(file_data, filename, path):
     file_bytes = bytes(file_data, "utf-8")

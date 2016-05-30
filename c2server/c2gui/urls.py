@@ -13,4 +13,5 @@ name='get_all_regions_status'),
     url(r'^send_c2_data$', views.send_c2_data, name='send_c2_data'),
     url(r'^retrieve_new_data$', views.retrieve_new_data, name='retrieve_new_data'),
     url(r'^clear_data$', views.clear_data, name='clear_data'),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
