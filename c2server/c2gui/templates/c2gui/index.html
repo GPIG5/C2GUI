@@ -55,8 +55,11 @@
 
             <div class="form-group">
             <label class="col-md-3 control-label" for="postBtn"></label>
-            <div class="col-md-8 control-label">
+            <div class="col-md-6 control-label">
                 <button type="submit" id="postBtn" class="btn btn-success">Submit</button>
+            </div>
+            <div class="col-md-2 control-label">
+                <button type="button" id="clearBtn" onclick="location.href='/c2gui/clear_data'" class="btn btn-danger">Clear all data</button>
             </div>
         </fieldset>
     </form>
@@ -65,7 +68,7 @@
          </div>
     </div> <!-- right-side-container -->
    <div id="timeline-wrapper">
-    {% include "c2gui/vertical_timeline.html" %}
+    {% include "c2gui/timeline.html" %}
     </div>
 
    <div id="legend-container">

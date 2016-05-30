@@ -2,16 +2,17 @@ import base64
 import binascii
 
 import io
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse, HttpResponseServerError
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse, HttpResponseServerError, HttpResponseRedirect
 from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.core import serializers
+from django.core.urlresolvers import reverse
 
 from . import utils
 from .communicator import Communicator
 from .utils import *
-from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer, PinorSerializer
+from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
 from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh, UploadDirect
 from .point import Point, Space
@@ -116,6 +117,7 @@ def send_drone_data(request):
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
         uuid = decoded_message.uuid
+        logging.debug(decoded_message.images)
         utils.decode_file_dictionary(decoded_message.images, "/tmp/" + uuid + "/")
 
 
@@ -154,9 +156,7 @@ def retrieve_new_data(request):
     min_date = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(minutes=15)
     old_drones = Drone.objects.exclude(last_communication__range=[min_date, datetime.datetime.now(tz=pytz.utc)])
     old_drones.delete()
-    drones = Drone.objects.all()
-    drone_serializer = DroneSerializer(drones, many=True)
-    drones_list = drone_serializer.data
+    drones_list = []
     return HttpResponse(simplejson.dumps({"new_events": new_event_list, "drones": drones_list, "height": REG_HEIGHT, "width": REG_WIDTH}), content_type='application/json')
 
 def send_c2_data(request):
@@ -171,6 +171,10 @@ def send_c2_data(request):
         print("sent xml data")
         return HttpResponse(data_str, content_type='application/xml')
 
-
-def retrieve_new_events(request):
-    return HttpResponse("test")
+def clear_data(request):
+    Image.objects.all().delete()
+    Event.objects.all().delete()
+    Pinor.objects.all().delete()
+    SearchArea.objects.all().update(status='NE')
+    events = Event.objects.all()
+    return HttpResponseRedirect("/c2gui/")

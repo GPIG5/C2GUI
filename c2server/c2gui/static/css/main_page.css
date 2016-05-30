@@ -16,7 +16,7 @@ html, body {
 }
 
 #map {
-    height: 50%;
+    height: 78%;
     width: 50%;
     float: left;
 }
@@ -27,7 +27,7 @@ html, body {
     max-width: 600px;
     width: 100%;
     max-height: 600px;
-    height: 500px;
+    height: 600px;
 }
 
 .right-side-container {
@@ -75,10 +75,10 @@ html, body {
 /* legend-related css */
 #legend-container {
     position: relative;
-    clear: both;
-    top: 65px;
-    left: 300px;
-    height: 100px;
+    float: left;
+    top: 10px;
+    left: 0px;
+    height: 40px;
 }
 
 .legend {

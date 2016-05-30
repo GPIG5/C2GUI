@@ -5,12 +5,12 @@ from . import views
 
 app_name = 'c2gui'
 urlpatterns = [
-    url(r'^$', views.index, name='index'),
+    url(r'^$', views.index, name='mainpage'),
     url(r'^send_search_coord$', views.send_search_coord, name='send_search_coord'),
     url(r'^get_all_regions_status$', views.get_all_regions_status,
 name='get_all_regions_status'),
     url(r'^send_drone_data$', views.send_drone_data, name='send_drone_data'),
-    url(r'^retrieve_new_events$', views.retrieve_new_events, name='retrieve_new_events'),
     url(r'^send_c2_data$', views.send_c2_data, name='send_c2_data'),
     url(r'^retrieve_new_data$', views.retrieve_new_data, name='retrieve_new_data'),
+    url(r'^clear_data$', views.clear_data, name='clear_data'),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

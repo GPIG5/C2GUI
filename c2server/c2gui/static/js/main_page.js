@@ -51,11 +51,9 @@ function initialize() {
         let regWidth = data.width;
         let pinors = data.pinors;
         for (let region of regionStatuses) {
-          var regionOptions;
+          var regionOptions = {"strokeWeight": 0};
           if (region.status === 'DD') {
             regionOptions = {"fillColor": "yellow", "strokeWeight": 0};
-          } else if (region.status === 'RE') {
-            regionOptions = {"fillColor": "red", "strokeWeight": 0};
           } else if (region.status === 'NRE') {
             regionOptions = {"fillColor": "green", "strokeWeight": 0};
           }
