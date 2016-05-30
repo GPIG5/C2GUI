@@ -1,3 +1,6 @@
+import binascii
+
+import io
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, HttpResponseServerError
 from django.db.models import Q
@@ -8,7 +11,7 @@ from .communicator import Communicator
 from .utils import *
 from .models import SearchArea, Event, Pinor, Drone, EventSerializer, DroneSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
-from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh
+from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh, UploadDirect
 from .point import Point, Space
 
 from decimal import *
@@ -20,6 +23,7 @@ import geopy.distance
 import logging
 import datetime
 import pytz
+import tarfile
 logging.basicConfig(filename='access.log', level=logging.DEBUG)
 
 def index(request):
@@ -104,6 +108,20 @@ def send_drone_data(request):
                           bottomleftlat, -bottomleftlon, toprightlat, -toprightlon,))
         new_event.save()
         new_event.regions.add(*list(areasComplete))
+
+    elif json_message["data"]["datatype"] == "upload":
+        decoded_message = UploadDirect.from_json(json_message)
+        binary_data = binascii.a2b_base64(decoded_message.images)
+        file_object = io.BytesIO(binary_data)
+        tar = tarfile.open(fileobj=file_object)
+        tar_members = tar.getmembers()
+        print("Number of files: " + str(len(tar_members)))
+        for member in tar_members:
+            if member.name[-4:] == ".csv":
+                print("Found the csv! " + member.name)
+
+        # for member in tarmembers:
+        #     print(member.isfile())
     return HttpResponse("received data")
 
 def save_new_pinor(lat, lon, timestamp):

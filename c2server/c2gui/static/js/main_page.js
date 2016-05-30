@@ -206,6 +206,4 @@ $( document ).ready(function() {
         var form = document.getElementById("coordForm");
         form.reset();
       });
-
-
 });

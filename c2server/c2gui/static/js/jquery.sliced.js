@@ -4,6 +4,25 @@
         y      : 16, // number of tiles in y axis
     };
     
+    function convertCoordinatesToPixels(lat, lon) {
+            var min_lat = 53.929472;
+    	    var max_lat = 54.007111;
+    	    var min_lon = -1.165084;
+    	    var max_lon = -1.004663;
+    	    var lat_range = max_lat - min_lat;
+    	    var lon_range = max_lon - min_lon;
+    	    var map_left_x = $("#map").offset().left;
+    	    var map_right_x = map_left_x + $("#map").width();
+    	    var map_top_y = $("#map").offset().top;
+    	    var map_bottom_y = map_top_y + $("#map").height();
+    	    var map_left_offset = $("#map").offset().left;
+    	    var map_width = $("#map").width();
+            var map_height = $("#map").height();
+        left_offset = (lon - min_lon)/(max_lon - min_lon)*map_width;
+        top_offset = (max_lat - lat)/(max_lat - min_lat)*map_height;
+        return {"left_offset": left_offset, "top_offset": top_offset};
+    }
+
     $.fn.sliced = function ( options ) {
     
         var o = $.extend( {}, _defaults, options );
@@ -60,6 +79,13 @@
                         } else {
                             $('#region' + region.id).css({'opacity':0});
                         }
+                    }
+
+                    let pinors = data.pinors;
+                    for (let pinor of pinors){
+                        offsets = convertCoordinatesToPixels(pinor.lat, pinor.lon);
+                        $("#pinor-container").append("<img class='pinor' id='pinor" + pinor.id + "' src='/static/img/red_circle.png'>");
+                        $("#pinor" + pinor.id).css({"left": offsets.left_offset, "top": offsets.top_offset});
                     }
                 }
             });
