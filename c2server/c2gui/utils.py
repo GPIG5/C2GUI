@@ -26,7 +26,7 @@ def decode_file_dictionary(f_dict, root_path):
     if not os.path.isdir(root_path):
         os.makedirs(root_path)
     for i in f_dict:
-        if type(i) is str:
+        if type(f_dict[i]) is str:
             decode_file(f_dict[i], i, root_path)
-        elif type(i) is dict:
-            decode_file_dictionary(f_dict[i], root_path + i + "/")
+        elif type(f_dict[i]) is dict:
+            decode_file_dictionary(f_dict[i], root_path + "/" + i + "/")
