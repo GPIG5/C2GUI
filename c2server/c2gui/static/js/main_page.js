@@ -58,7 +58,9 @@ function initialize() {
           if (region.status === 'DD') {
             regionOptions = {"fillColor": "yellow", "strokeWeight": 0};
           } else if (region.status === 'NRE') {
-            regionOptions = {"fillColor": "green", "strokeWeight": 0};
+            regionOptions = {"fillColor": "#ff00ff", "strokeWeight": 0};
+          } else if (region.status === 'RE') {
+            regionOptions = {"fillColor": "blue", "strokeWeight": 0};
           }
           if (region.status !== 'NE') {
             var rectangle = new google.maps.Rectangle({
@@ -70,7 +72,8 @@ function initialize() {
                west: region.lon
               },
               clickable: false,
-              zIndex: SHAPE_Z_INDEX
+              zIndex: SHAPE_Z_INDEX,
+              fillOpacity: 0.3
             });
             rectangle.setOptions(regionOptions);
             all_overlays[region.id] = rectangle;
@@ -163,7 +166,7 @@ $( document ).ready(function() {
               if (new_event.pinor) {
                   var pinor = new_event.pinor;
                   var imageStr = "";
-                  if (pinor.images.length > 0) {
+                  if (pinor.hasOwnProperty('images') && pinor.images.length > 0) {
                     imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '">';
                   }
                   var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
@@ -180,32 +183,37 @@ $( document ).ready(function() {
                       animation: google.maps.Animation.DROP,
                       html: contentString
                   });
-                  marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+                  if (pinor.origin === "O") {
+                    marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+                  }
                   marker.setMap(map);
                   markers.push(marker);
               }
               if (new_event.regions.length > 0) {
-                  if (new_event.event_type === "CS"){
-                      for (let region of new_event.regions) {
-                          var rectangle;
-                          if (!all_overlays.hasOwnProperty(region.id)) {
-                            rectangle = new google.maps.Rectangle({
-                              map: map,
-                              bounds: {
-                                north: parseFloat(region.lat + regHeight),
-                                south: parseFloat(region.lat),
-                                east: parseFloat(region.lon + regWidth),
-                                west: parseFloat(region.lon)
-                              },
-                              clickable: false,
-                              zIndex: SHAPE_Z_INDEX
-                            });
-                            all_overlays[region.id] = rectangle;
-                          } else {
-                            rectangle = all_overlays[region.id];
-                          }
-                          rectangle.setOptions({"fillColor": "green", "strokeWeight": 0});
+                  for (let region of new_event.regions) {
+                      var rectangle;
+                      if (!all_overlays.hasOwnProperty(region.id)) {
+                        rectangle = new google.maps.Rectangle({
+                          map: map,
+                          bounds: {
+                            north: parseFloat(region.lat) + regHeight,
+                            south: parseFloat(region.lat),
+                            east: parseFloat(region.lon) + regWidth,
+                            west: parseFloat(region.lon)
+                          },
+                          clickable: false,
+                          zIndex: SHAPE_Z_INDEX
+                        });
+                        all_overlays[region.id] = rectangle;
+                      } else {
+                        rectangle = all_overlays[region.id];
                       }
+                      if (region.status === 'NRE') {
+                        rectangle.setOptions({"fillColor": "#ff00ff", "strokeWeight": 0});
+                      } else if (region.status === 'RE') {
+                        rectangle.setOptions({"fillColor": "blue", "strokeWeight": 0, "fillOpacity": 0.3});
+                      }
+                    
                   }
               }
           }

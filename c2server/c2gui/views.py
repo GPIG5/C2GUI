@@ -83,9 +83,7 @@ def get_all_regions_status(request):
 @csrf_exempt
 def send_drone_data(request):
     unicode_message = request.body.decode("utf-8")
-    # print(unicode_message)
     json_message = json.loads(unicode_message)
-    #logging.debug(json_message)
     if json_message["data"]["datatype"] == "pinor":
         decoded_message = PinorMesh.from_json(json_message)
         for pinor in decoded_message.pinor:
@@ -93,7 +91,7 @@ def send_drone_data(request):
             lat = Decimal(pinor.latitude) + Decimal(0)
             lon = Decimal(pinor.longitude) + Decimal(0)
             time_stamp = datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)
-            save_new_pinor(lat, lon, time_stamp)
+            save_new_pinor(lat, lon, time_stamp, "M")
     elif json_message["data"]["datatype"] == "status":
         decoded_message = StatusMesh.from_json(json_message)
         drone, created = Drone.objects.update_or_create(uid=decoded_message.uuid,
@@ -168,9 +166,10 @@ def save_new_pinor(lat, lon, timestamp, origin='M'):
                       text="Found a stranded person at %f N %f W" % (lat, -lon),
                       pinor=new_pinor)
         new_event.save()
+        new_event.regions.add(region)
 
 def retrieve_new_data(request):
-    utils.get_ext_c2_data()
+    #utils.get_ext_c2_data()
     new_events = Event.objects.filter(is_new=True)
     event_serializer = EventSerializer(new_events, many=True)
     new_event_list = event_serializer.data

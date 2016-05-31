@@ -73,7 +73,7 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ('event_type', 'headline', 'text', 'timestamp', 'pinor', 'regions')
-        depth = 2
+        depth = 3
 
 class DroneSerializer(serializers.ModelSerializer):
     class Meta:
