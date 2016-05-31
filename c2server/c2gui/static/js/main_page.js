@@ -123,6 +123,11 @@ function initialize() {
               });
 
   google.maps.event.addListener(map, 'click', deleteSelectedShape);
+  google.maps.event.addListener(drawingManager, "drawingmode_changed", function() {
+    if (drawingManager.getDrawingMode() != null) {
+      deleteSelectedShape();
+    }
+  });
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
