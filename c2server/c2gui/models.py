@@ -65,7 +65,7 @@ class RegionSerializer(serializers.ModelSerializer):
 class PinorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pinor
-        fields = ('pk', 'lat', 'lon', 'timestamp', "images")
+        fields = ('pk', 'lat', 'lon', 'timestamp', "images", 'origin')
         depth = 1
 
 class EventSerializer(serializers.ModelSerializer):

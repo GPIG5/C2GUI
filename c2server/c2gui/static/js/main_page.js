@@ -75,13 +75,16 @@ function initialize() {
           }
         }
         for (let pinor of pinors) {
-          console.log(pinor);
+          var imageStr = "";
+          if (pinor.images.length > 0) {
+            imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '">';
+          }
           var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
           var contentString = '<div class="content">' +
             'Detected on ' + timeString +
             ' at the location (' + pinor.lat + ' N, ' +
             (-pinor.lon) + ' W)' +
-            '<br><img src="/c2gui' + pinor.images[0].photo + '">' +
+            imageStr +
             '</div>';
 
           var marker = new google.maps.Marker({
@@ -91,6 +94,9 @@ function initialize() {
             clickable: true,
             html: contentString
           });
+          if (pinor.origin === 'O') {
+            marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+          }
           markers.push(marker);        
         }
         lastMarker = markers.length;
@@ -149,11 +155,16 @@ $( document ).ready(function() {
               timeline.add(ev);
               if (new_event.pinor) {
                   var pinor = new_event.pinor;
+                  var imageStr = "";
+                  if (pinor.images.length > 0) {
+                    imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '">';
+                  }
                   var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
                   var contentString = '<div class="content">' +
                     'Detected on ' + timeString +
                     ' at the location (' + pinor.lat + ' N, ' +
                     (-pinor.lon) + ' W).' +
+                    imageStr +
                     '</div>';
                   var marker = new google.maps.Marker({
                       position: {lat: parseFloat(new_event.pinor.lat), lng: parseFloat(new_event.pinor.lon)},
@@ -162,6 +173,7 @@ $( document ).ready(function() {
                       animation: google.maps.Animation.DROP,
                       html: contentString
                   });
+                  marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
                   marker.setMap(map);
                   markers.push(marker);
               }

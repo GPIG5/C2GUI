@@ -91,4 +91,4 @@ def _create_xml(pinor_list):
 
 def _update_db(pinor_list):
     for pinor in pinor_list:
-        save_new_pinor(pinor.lat, pinor.lon, pinor.timestamp)
+        save_new_pinor(pinor.lat, pinor.lon, pinor.timestamp, 'O')

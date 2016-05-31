@@ -142,7 +142,7 @@ def send_drone_data(request):
     return HttpResponse("received data")
 
 
-def save_new_pinor(lat, lon, timestamp):
+def save_new_pinor(lat, lon, timestamp, origin='M'):
     region = SearchArea.objects.filter(lat__lte=lat)\
         .filter(lat__gte=lat - REG_HEIGHT)\
         .filter(lon__gte=lon - REG_WIDTH)\
@@ -154,8 +154,7 @@ def save_new_pinor(lat, lon, timestamp):
 
     region.status = "RE"
 
-    new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults={"region": region,
-                                                                                 "timestamp": timestamp})
+    new_pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults={"region": region, "timestamp": timestamp, "origin": origin})
     if created:
         region.save()
         new_pinor.save()
