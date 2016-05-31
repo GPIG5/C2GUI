@@ -20,6 +20,7 @@ class Event(models.Model):
         ('IS', 'Initiated search'),
         ('POI', 'Found a point of interest'),
         ('CS', 'Completed search'),
+        ('RP', 'Received a point of interest from another team')
     )
 
     event_type = models.CharField(max_length=3, choices=EVENT_TYPES)

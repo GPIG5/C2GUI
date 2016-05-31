@@ -20,3 +20,12 @@ def decode_file_dictionary(f_dict, root_path):
             decode_file(f_dict[i], i, root_path)
         elif type(f_dict[i]) is dict:
             decode_file_dictionary(f_dict[i], root_path + "/" + i + "/")
+
+
+def get_ext_c2_data():
+    from c2ext.c2_data import get_updates_from_ext_c2s
+    with open("ext_c2_addr.txt", "r") as file:
+        urls = file.read().splitlines()
+    pinor_list = []
+    for url in urls:
+        get_updates_from_ext_c2s(url)

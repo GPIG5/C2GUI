@@ -11,6 +11,7 @@ var markers = [];
 var lastMarker = 0;
 var regHeight = 0;
 var regWidth = 0;
+var SHAPE_Z_INDEX = 100;
 
 function deleteSelectedShape() {
   if (selectedShape) {
@@ -68,7 +69,8 @@ function initialize() {
                east: region.lon + regWidth,
                west: region.lon
               },
-              clickable: false
+              clickable: false,
+              zIndex: SHAPE_Z_INDEX
             });
             rectangle.setOptions(regionOptions);
             all_overlays[region.id] = rectangle;
@@ -190,7 +192,8 @@ $( document ).ready(function() {
                                 east: parseFloat(region.lon + regWidth),
                                 west: parseFloat(region.lon)
                               },
-                              clickable: false
+                              clickable: false,
+                              zIndex: SHAPE_Z_INDEX
                             });
                             all_overlays[region.id] = rectangle;
                           } else {
@@ -261,7 +264,8 @@ $( document ).ready(function() {
                      east: parseFloat(region.lon + regWidth),
                      west: parseFloat(region.lon)
                    },
-                   clickable: false
+                   clickable: false,
+                   zIndex: SHAPE_Z_INDEX
                  });
                  all_overlays[region.id] = rectangle;
                } else {

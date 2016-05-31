@@ -29,6 +29,7 @@ import datetime
 import pytz
 import tarfile
 logging.basicConfig(filename='access.log', level=logging.DEBUG)
+getcontext().prec = 6
 
 def index(request):
     events = Event.objects.all()
@@ -118,7 +119,7 @@ def send_drone_data(request):
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
         uuid = decoded_message.uuid
-        #logging.debug(decoded_message.images)
+        logging.debug(uuid)
         utils.decode_file_dictionary(decoded_message.images, "/tmp/" + uuid + "/")
         with open('/tmp/' + uuid + '/locations.csv') as csvfile:
             location_reader = csv.DictReader(csvfile)
@@ -132,6 +133,7 @@ def send_drone_data(request):
         with open('/tmp/' + uuid + '/pinor.csv') as csvfile:
             pinor_reader = csv.DictReader(csvfile)
             for row in pinor_reader:
+                getcontext().prec = 6
                 lat = Decimal(row["lat"]) + Decimal(0)
                 lon = Decimal(row["lon"]) + Decimal(0)
                 img = Image.objects.get(lat=lat, lon=lon)
@@ -158,23 +160,22 @@ def save_new_pinor(lat, lon, timestamp, origin='M'):
     if created:
         region.save()
         new_pinor.save()
-        new_event = Event(event_type='POI', headline="Found a stranded person",
+        if origin == "O":
+            new_event = Event(event_type='RP', headline="Received a point of interest",
+                              text="Received a point of interest at %f N %f W" % (lat, -lon), pinor=new_pinor)
+        else:
+            new_event = Event(event_type='POI', headline="Found a stranded person",
                       text="Found a stranded person at %f N %f W" % (lat, -lon),
                       pinor=new_pinor)
         new_event.save()
 
 def retrieve_new_data(request):
+    utils.get_ext_c2_data()
     new_events = Event.objects.filter(is_new=True)
     event_serializer = EventSerializer(new_events, many=True)
     new_event_list = event_serializer.data
     new_events.update(is_new=False)
-
-    # remove old drones from the database
-    min_date = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(minutes=15)
-    old_drones = Drone.objects.exclude(last_communication__range=[min_date, datetime.datetime.now(tz=pytz.utc)])
-    old_drones.delete()
-    drones_list = []
-    return HttpResponse(simplejson.dumps({"new_events": new_event_list, "drones": drones_list, "height": REG_HEIGHT, "width": REG_WIDTH}), content_type='application/json')
+    return HttpResponse(simplejson.dumps({"new_events": new_event_list, "height": REG_HEIGHT, "width": REG_WIDTH}), content_type='application/json')
 
 def send_c2_data(request):
     from c2ext.c2_data import create_xml_for_ext_c2
