@@ -36,7 +36,7 @@ class Event(models.Model):
 class Pinor(models.Model):
     lat = models.DecimalField(max_digits=8, decimal_places=6)
     lon = models.DecimalField(max_digits=8, decimal_places=6)
-    region = models.ForeignKey('SearchArea', on_delete=models.CASCADE)
+    region = models.ForeignKey('SearchArea', on_delete=models.CASCADE, blank=True, null=True)
     timestamp = models.DateTimeField()
     origin = models.CharField(max_length=1, choices=(('M', 'My Team'), ('O', 'Other Team'), ), default='M')
 
@@ -64,13 +64,22 @@ class RegionSerializer(serializers.ModelSerializer):
         model = SearchArea
         fields = ('pk', 'status', 'lat', 'lon')
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ('photo',)
+
 class PinorSerializer(serializers.ModelSerializer):
+    images = ImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Pinor
         fields = ('pk', 'lat', 'lon', 'timestamp', "images", 'origin')
         depth = 1
 
 class EventSerializer(serializers.ModelSerializer):
+    pinor = PinorSerializer(read_only=True)
+
     class Meta:
         model = Event
         fields = ('event_type', 'headline', 'text', 'timestamp', 'pinor', 'regions')

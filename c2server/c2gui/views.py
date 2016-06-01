@@ -135,14 +135,13 @@ def send_drone_data(request):
                 getcontext().prec = 6
                 lat = Decimal(row["lat"]) + Decimal(0)
                 lon = Decimal(row["lon"]) + Decimal(0)
-                logging.debug(lat)
-                logging.debug(lon)
                 try:
-                    pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults={"timestamp": datetime.datetime.utcfromtimestam(row["timestamp"])})
-                    pinor.save()
-                    img = Image.objects.get(photo= uuid + "/images/" + row["img"])
-                    img.pinor = pinor
-                    img.save()
+                    pinor = save_new_pinor(lat, lon, datetime.datetime.utcfromtimestamp(float(row["timestamp"])).replace(tzinfo=pytz.utc))
+                    if float(row["dist"]) < 50:
+                        img = Image.objects.get(photo= uuid + "/images/" + row["img"])
+                        img.pinor = pinor
+                        img.save()
+
                 except Image.DoesNotExist:
                     logging.debug("Image does not exist: " + row["img"])
 
@@ -187,6 +186,7 @@ def save_new_pinor(lat, lon, timestamp, origin='M'):
                       pinor=new_pinor)
         new_event.save()
         new_event.regions.add(region)
+    return new_pinor
 
 def retrieve_new_data(request):
     #utils.get_ext_c2_data()
