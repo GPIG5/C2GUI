@@ -76,7 +76,7 @@ function initialize() {
               fillOpacity: 0.3
             });
             rectangle.setOptions(regionOptions);
-            all_overlays[region.id] = rectangle;
+            all_overlays[region.pk] = rectangle;
           }
         }
         for (let pinor of pinors) {
@@ -193,7 +193,7 @@ $( document ).ready(function() {
               if (new_event.regions.length > 0) {
                   for (let region of new_event.regions) {
                       var rectangle;
-                      if (!all_overlays.hasOwnProperty(region.id)) {
+                      if (!all_overlays.hasOwnProperty(region.pk)) {
                         rectangle = new google.maps.Rectangle({
                           map: map,
                           bounds: {
@@ -205,9 +205,9 @@ $( document ).ready(function() {
                           clickable: false,
                           zIndex: SHAPE_Z_INDEX
                         });
-                        all_overlays[region.id] = rectangle;
+                        all_overlays[region.pk] = rectangle;
                       } else {
-                        rectangle = all_overlays[region.id];
+                        rectangle = all_overlays[region.pk];
                       }
                       if (region.status === 'NRE') {
                         rectangle.setOptions({"fillColor": "#ff00ff", "strokeWeight": 0});
@@ -271,7 +271,7 @@ $( document ).ready(function() {
 
              for (let region of regions) {
                var rectangle;
-               if (!all_overlays.hasOwnProperty(region.id)) {
+               if (!all_overlays.hasOwnProperty(region.pk)) {
                  rectangle = new google.maps.Rectangle({
                    map: map,
                    bounds: {
@@ -283,9 +283,9 @@ $( document ).ready(function() {
                    clickable: false,
                    zIndex: SHAPE_Z_INDEX
                  });
-                 all_overlays[region.id] = rectangle;
+                 all_overlays[region.pk] = rectangle;
                } else {
-                 rectangle = all_overlays[region.id];
+                 rectangle = all_overlays[region.pk];
                }
                rectangle.setOptions({"fillColor": "yellow", "strokeWeight": 0, "fillOpacity": 0.3});
              }
