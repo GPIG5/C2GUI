@@ -165,7 +165,6 @@ $( document ).ready(function() {
               timeline.add(ev);
               if (new_event.pinor) {
                   var pinor = new_event.pinor;
-                  console.log(pinor);
                   var imageStr = "";
                   if (pinor.hasOwnProperty('images') && pinor.images.length > 0) {
                     imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '">';
@@ -190,6 +189,7 @@ $( document ).ready(function() {
                   marker.setMap(map);
                   markers.push(marker);
               }
+              console.log(new_event);
               if (new_event.regions.length > 0) {
                   for (let region of new_event.regions) {
                       var rectangle;

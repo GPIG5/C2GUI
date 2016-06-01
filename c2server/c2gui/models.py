@@ -79,6 +79,7 @@ class PinorSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.ModelSerializer):
     pinor = PinorSerializer(read_only=True)
+    regions = RegionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Event
