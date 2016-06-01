@@ -145,7 +145,6 @@ $( document ).ready(function() {
           //let regWidth = data.width;
 
           for (let new_event of new_events) {
-              console.log(new_event);
               event_date = new Date(new_event.timestamp);
               var ev = {
                   "start_date": {
@@ -166,6 +165,7 @@ $( document ).ready(function() {
               timeline.add(ev);
               if (new_event.pinor) {
                   var pinor = new_event.pinor;
+                  console.log(pinor);
                   var imageStr = "";
                   if (pinor.hasOwnProperty('images') && pinor.images.length > 0) {
                     imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '">';
@@ -247,27 +247,29 @@ $( document ).ready(function() {
           url : 'send_search_coord',
           data : str,
           success : function(data) {
+             console.log(data);
+             new_event = {
+               "start_date": {
+                 "year": data.timestamp.year,
+                 "month": data.timestamp.month,
+                 "day": data.timestamp.day,
+                 "hour": data.timestamp.hour,
+                 "minute": data.timestamp.minute,
+                 "second": data.timestamp.second,
+                 "millisecond": "",
+                 "format": ""
+               },
+               "text": {
+                 "headline": data.headline,
+                 "text": data.text
+               }
+             };
+             timeline.add(new_event);
+             timeline.goToEnd();
              let regions = data.regions;
              deleteSelectedShape();
+
              for (let region of regions) {
-               var new_event = {
-                 "start_date": {
-                    "year": data.timestamp.year,
-                    "month": data.timestamp.month,
-                    "day": data.timestamp.day,
-                    "hour": data.timestamp.hour,
-                    "minute": data.timestamp.minute,
-                    "second": data.timestamp.second,
-                    "millisecond": "",
-                    "format": ""
-                 },
-                 "text": {
-                    "headline": data.headline,
-                    "text": data.text
-                 }
-               };
-               timeline.add(new_event);
-               timeline.goToEnd();
                var rectangle;
                if (!all_overlays.hasOwnProperty(region.id)) {
                  rectangle = new google.maps.Rectangle({
