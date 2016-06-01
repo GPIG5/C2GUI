@@ -4,7 +4,7 @@ import struct
 
 from .messages import DeployMesh
 
-HOST = '127.0.0.1'
+HOST = '144.32.178.59'
 PORT = 5556
 
 class Communicator:
