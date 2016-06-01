@@ -1,5 +1,6 @@
 import base64
 import os
+import aiofiles
 
 from .communicator import Communicator
 from .models import Image
@@ -29,3 +30,17 @@ def get_ext_c2_data():
     pinor_list = []
     for url in urls:
         get_updates_from_ext_c2s(url)
+
+def readfiles(path):
+    op = {}
+    for f in os.listdir(path):
+        if os.path.isfile(os.path.join(path, f)):
+            fl = yield from aiofiles.open(os.path.join(path, f), mode='rb')
+            try:
+                contents = yield from fl.read()
+            finally:
+                yield from fl.close()
+            op[f] = base64.b64encode(contents).decode('utf-8')
+        else:
+            op[f] = yield from readfiles(os.path.join(path, f))
+    return op

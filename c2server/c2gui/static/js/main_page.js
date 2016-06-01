@@ -141,10 +141,11 @@ $( document ).ready(function() {
         url: 'retrieve_new_data',
         success: function(data) {
           let new_events = data.new_events;
-          let regHeight = data.height;
-          let regWidth = data.width;
+          //let regHeight = data.height;
+          //let regWidth = data.width;
 
           for (let new_event of new_events) {
+              console.log(new_event);
               event_date = new Date(new_event.timestamp);
               var ev = {
                   "start_date": {
@@ -231,7 +232,7 @@ $( document ).ready(function() {
         },
         complete: function() {
           // Schedule the next request when the current one is complete
-          setTimeout(periodic_worker, 15000);    
+          setTimeout(periodic_worker, 1000);    
         }
       });
     })();
@@ -272,9 +273,9 @@ $( document ).ready(function() {
                  rectangle = new google.maps.Rectangle({
                    map: map,
                    bounds: {
-                     north: parseFloat(region.lat + regHeight),
+                     north: parseFloat(region.lat) + regHeight,
                      south: parseFloat(region.lat),
-                     east: parseFloat(region.lon + regWidth),
+                     east: parseFloat(region.lon) + regWidth,
                      west: parseFloat(region.lon)
                    },
                    clickable: false,
@@ -284,7 +285,7 @@ $( document ).ready(function() {
                } else {
                  rectangle = all_overlays[region.id];
                }
-               rectangle.setOptions({"fillColor": "yellow", "strokeWeight": 0});
+               rectangle.setOptions({"fillColor": "yellow", "strokeWeight": 0, "fillOpacity": 0.3});
              }
           }
         });
