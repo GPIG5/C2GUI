@@ -35,6 +35,9 @@ def index(request):
     events = Event.objects.all()
     return render(request, 'c2gui/index.html', {"event_list": events})
 
+def survey(request):
+    return render(request, 'c2gui/survey.html', {})
+
 def send_search_coord(request):
     bottomleftlat = Decimal(request.POST['bottomleftlat'])
     bottomleftlon = Decimal(request.POST['bottomleftlon'])
