@@ -28,10 +28,19 @@
       // Now filter this.
       brightness(c, ctx, 0.3);
     };
-
+    // Do XHR requests to get images to draw.
+    $.ajax({
+      url: "retrieve_survey",
+      dataType: "json",
+      context: document.body
+    }).done(function(data) {
+      data['data'].forEach(function(item) {
+        draw_survey(c, ctx, item);
+      });
+    });
   });
 
-  function brightness(c,ctx,perc) {
+  function brightness(c, ctx, perc) {
     pixels = ctx.getImageData(0,0,c.width,c.height);
     var d = pixels.data;
     for (var i=0; i<d.length; i+=4) {
@@ -40,6 +49,10 @@
       d[i+2] *= perc;
     }
     ctx.putImageData(pixels, 0, 0);
+  }
+
+  function draw_survey(c, ctx, image) {
+    console.log(image);
   }
 </script>
 </body>

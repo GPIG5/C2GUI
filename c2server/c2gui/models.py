@@ -79,3 +79,9 @@ class DroneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Drone
         fields = ('uid', 'lat', 'lon')
+
+
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = ('lat', 'lon', 'photo')

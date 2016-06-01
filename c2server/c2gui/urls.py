@@ -7,6 +7,7 @@ app_name = 'c2gui'
 urlpatterns = [
     url(r'^$', views.index, name='mainpage'),
     url(r'^survey$', views.survey, name='surveypage'),
+    url(r'^retrieve_survey$', views.retrieve_survey, name='retrieve_survey'),
     url(r'^send_search_coord$', views.send_search_coord, name='send_search_coord'),
     url(r'^get_all_regions_status$', views.get_all_regions_status,
 name='get_all_regions_status'),

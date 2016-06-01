@@ -13,7 +13,7 @@ from django.core.urlresolvers import reverse
 from . import utils
 from .communicator import Communicator
 from .utils import *
-from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer, RegionSerializer
+from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer, RegionSerializer, ImageSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
 from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh, UploadDirect
 from .point import Point, Space
@@ -178,6 +178,12 @@ def retrieve_new_data(request):
     new_event_list = event_serializer.data
     new_events.update(is_new=False)
     return HttpResponse(simplejson.dumps({"new_events": new_event_list, "height": REG_HEIGHT, "width": REG_WIDTH}), content_type='application/json')
+
+def retrieve_survey(request):
+    images = Image.objects.all()
+    image_serializer = ImageSerializer(images, many=True)
+    image_data = image_serializer.data
+    return HttpResponse(simplejson.dumps({'data':image_data}), content_type='application/json')
 
 def send_c2_data(request):
     from c2ext.c2_data import create_xml_for_ext_c2
