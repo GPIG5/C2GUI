@@ -15,8 +15,9 @@ from .communicator import Communicator
 from .utils import *
 from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer, RegionSerializer, ImageSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT
-from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, CompleteMesh, UploadDirect
+from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, UploadDirect
 from .point import Point, Space
+from .datastore import SectorState
 
 from decimal import *
 import codecs
@@ -120,7 +121,7 @@ def send_drone_data(request):
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
         uuid = decoded_message.uuid
-        logging.debug(uuid)
+        logging.debug(decoded_message.grid_state)
         utils.decode_file_dictionary(decoded_message.images, "/tmp/" + uuid + "/")
         with open('/tmp/' + uuid + '/locations.csv') as csvfile:
             location_reader = csv.DictReader(csvfile)
@@ -128,7 +129,7 @@ def send_drone_data(request):
                 getcontext().prec = 6
                 lat = Decimal(row["lat"]) + Decimal(0)
                 lon = Decimal(row["lon"]) + Decimal(0)
-                obj, created = Image.objects.get_or_create(lat=lat, lon=lon, defaults={"photo": "/tmp/images/" + row["img"]}) 
+                obj, created = Image.objects.get_or_create(lat=lat, lon=lon, defaults={"photo": uuid + "/images/" + row["img"]}) 
                 obj.save()
 
         with open('/tmp/' + uuid + '/pinor.csv') as csvfile:
@@ -137,11 +138,30 @@ def send_drone_data(request):
                 getcontext().prec = 6
                 lat = Decimal(row["lat"]) + Decimal(0)
                 lon = Decimal(row["lon"]) + Decimal(0)
-                img = Image.objects.get(lat=lat, lon=lon)
-                pinor = Pinor.objects.get(lat=lat, lon=lon)
-                img.pinor = pinor
-                img.save()
+                logging.debug(lat)
+                logging.debug(lon)
+                try:
+                    pinor, created = Pinor.objects.get_or_create(lat=lat, lon=lon, defaults={"timestamp": datetime.datetime.utcfromtimestam(row["timestamp"])})
+                    pinor.save()
+                    img = Image.objects.get(photo= uuid + "/images/" + row["img"])
+                    img.pinor = pinor
+                    img.save()
+                except Image.DoesNotExist:
+                    logging.debug("Image does not exist: " + row["img"])
 
+        if decoded_message.grid_state:        
+            for pos, state in decoded_message.grid_state.sector_state.items():
+                if state[0] == SectorState.searched:
+                    [bottom_left, bottom_right, top_left, top_right] = decoded_message.grid_state.get_sector_corners(pos)
+                    areasComplete = SearchArea.objects.exclude(
+                        Q(lat__gt=top_right.latitude) | Q(lat__lt=bottom_left.latitude - REG_HEIGHT)
+                        ).exclude(Q(lon__gt=top_right.longitude) | Q(lon__lt=bottom_left.longitude - REG_WIDTH)).exclude(status='NRE')
+                    if areasComplete:
+                        areasComplete.update(status='NRE')
+                        new_event = Event(event_type='CS', headline="Completed search",
+                            text="Completed search at the area (%f N, %f W):(%f N, %f W)" % (bottom_left.latitude, -bottom_left.longitude, top_right.latitude, -top_right.longitude,))
+                        new_event.save()
+                        new_event.regions.add(*list(areasComplete))
     return HttpResponse("received data")
 
 
@@ -202,7 +222,8 @@ def clear_data(request):
     Event.objects.all().delete()
     Pinor.objects.all().delete()
     SearchArea.objects.all().update(status='NE')
-    events = Event.objects.all()
+    new_event = Event(event_type='SS', headline="Started the server", text="")
+    new_event.save()
     return HttpResponseRedirect("/c2gui/")
 
 def get_ext_c2_data(request):

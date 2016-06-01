@@ -17,6 +17,7 @@ class SearchArea(models.Model):
 
 class Event(models.Model):
     EVENT_TYPES = (
+        ('SS', 'Started the server'),
         ('IS', 'Initiated search'),
         ('POI', 'Found a point of interest'),
         ('CS', 'Completed search'),
@@ -49,7 +50,7 @@ class Drone(models.Model):
     last_communication = models.DateTimeField(auto_now=True)
 
 class Image(models.Model):
-    photo = models.ImageField(upload_to='drone-images')
+    photo = models.ImageField(upload_to='')
     lat = models.DecimalField(max_digits=8, decimal_places=6)
     lon = models.DecimalField(max_digits=8, decimal_places=6)
     pinor = models.ForeignKey('Pinor', on_delete=models.CASCADE, blank=True, null=True, related_name="images")

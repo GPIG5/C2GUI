@@ -1,6 +1,7 @@
-from .point import Point, Space
 import time
 
+from .datastore import GridState
+from .point import Point, Space
 
 class Message:
     def __init__(self, uuid, t):
@@ -182,13 +183,16 @@ class DeployMesh(MeshMessage):
         return self
 
 class UploadDirect(DirectMessage):
-    def __init__(self, uuid, images):
+    def __init__(self, uuid, images, grid):
         DirectMessage.__init__(self, uuid)
         self.images = images
+        self.grid_state = grid
     def to_json(self):
         d = DirectMessage.to_json(self)
         d["data"]["images"] = self.images
         d["data"]["datatype"] = "upload"
+        if self.grid_state is not None:
+            d["data"]["grid"] = self.grid_state.to_json()
         return d
     @classmethod
     def from_json(cls, d, self=None):
@@ -196,30 +200,25 @@ class UploadDirect(DirectMessage):
             self = cls.__new__(cls)
         self = DirectMessage.from_json(d, self)
         self.images = d["data"]["images"]
+        if "grid" in d["data"]:
+            self.grid_state = GridState.from_json(d["data"]["grid"])
+        else:
+            self.grid_state = None
         return self
 
-class ClaimMesh(MeshMessage):
-    def __init__(self, uuid, origin, sector_index, space):
+class GridMesh(MeshMessage):
+    def __init__(self, uuid, origin, grid_state):
         MeshMessage.__init__(self, uuid, origin)
-        self.sector_index = sector_index
-        self.space = space
+        self.grid_state = grid_state
     def to_json(self):
         d = MeshMessage.to_json(self)
-        d['data']['sector'] = list(self.sector_index)
-        d['data']['space'] = self.space.to_json()
-        d['data']['datatype'] = "claim"
+        d['data']['datatype'] = 'grid'
+        d['data']['grid_state'] = self.grid_state.to_json()
         return d
     @classmethod
     def from_json(cls, d, self=None):
         if self is None:
             self = cls.__new__(cls)
         self = MeshMessage.from_json(d, self)
-        self.sector_index = tuple(d['data']['sector'])
-        self.space = Space.from_json(d["data"]["space"])
+        self.grid_state = GridState.from_json(d['data']['grid_state'])
         return self
-
-class CompleteMesh(ClaimMesh):
-    def to_json(self):
-        d = ClaimMesh.to_json(self)
-        d['data']['datatype'] = "complete"
-        return d
