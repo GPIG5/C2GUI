@@ -121,7 +121,6 @@ def send_drone_data(request):
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
         uuid = decoded_message.uuid
-        logging.debug(decoded_message.grid_state)
         utils.decode_file_dictionary(decoded_message.images, "/tmp/" + uuid + "/")
         with open('/tmp/' + uuid + '/locations.csv') as csvfile:
             location_reader = csv.DictReader(csvfile)
@@ -140,7 +139,7 @@ def send_drone_data(request):
                 lon = Decimal(row["lon"]) + Decimal(0)
                 try:
                     pinor = save_new_pinor(lat, lon, datetime.datetime.utcfromtimestamp(float(row["timestamp"])).replace(tzinfo=pytz.utc))
-                    if float(row["dist"]) < 50:
+                    if float(row["dist"]) < 80:
                         img = Image.objects.get(photo= uuid + "/images/" + row["img"])
                         img.pinor = pinor
                         img.save()
@@ -148,19 +147,28 @@ def send_drone_data(request):
                 except Image.DoesNotExist:
                     logging.debug("Image does not exist: " + row["img"])
 
-        if decoded_message.grid_state:        
+        if decoded_message.grid_state:
             for pos, state in decoded_message.grid_state.sector_state.items():
                 if state[0] == SectorState.searched:
                     [bottom_left, bottom_right, top_left, top_right] = decoded_message.grid_state.get_sector_corners(pos)
+                    toprightlat = Decimal(top_right.latitude) + Decimal(0)
+                    bottomleftlat = Decimal(bottom_left.latitude) + Decimal(0)
+                    toprightlon = Decimal(top_right.longitude) + Decimal(0)
+                    bottomleftlon = Decimal(bottom_left.longitude) + Decimal(0)
                     areasComplete = SearchArea.objects.exclude(
-                        Q(lat__gt=top_right.latitude) | Q(lat__lt=bottom_left.latitude - REG_HEIGHT)
-                        ).exclude(Q(lon__gt=top_right.longitude) | Q(lon__lt=bottom_left.longitude - REG_WIDTH)).exclude(status='NRE')
-                    if areasComplete:
-                        areasComplete.update(status='NRE')
+                        Q(lat__gt=toprightlat) | Q(lat__lt=bottomleftlat - REG_HEIGHT)).exclude(Q(lon__gt=toprightlon) | Q(lon__lt=bottomleftlon - REG_WIDTH)).exclude(status='NRE').exclude(status='RE')
+                    if areasComplete.count() > 0:
+                        ids = list(areasComplete.values_list('pk', flat=True))
+                        logging.debug("id: %s" % ids)
+                        SearchArea.objects.filter(pk__in=ids).update(status='NRE')
                         new_event = Event(event_type='CS', headline="Completed search",
                             text="Completed search at the area (%f N, %f W):(%f N, %f W)" % (bottom_left.latitude, -bottom_left.longitude, top_right.latitude, -top_right.longitude,))
                         new_event.save()
-                        new_event.regions.add(*list(areasComplete))
+                        for area_id in ids:
+                            logging.debug("adding area %s" % area_id)
+                            new_event.regions.add(SearchArea.objects.get(pk=area_id))
+                        #updatedAreas = SearchArea.objects.filter(pk__in=ids)
+                        #new_event.regions.add(*list(updatedAreas))
     return HttpResponse("received data")
 
 

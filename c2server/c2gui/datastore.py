@@ -195,7 +195,7 @@ class GridState:
                 self.sector_state[key] = new_sector_state[key]
 
     def to_json(self):
-        return {
+        json_dict = {
             'space': self.space.to_json(),
             'detection_radius': self.detection_radius,
             'y_count': self.y_count,
@@ -205,6 +205,7 @@ class GridState:
             'sector_width': self.sector_width,
             'sector_state': {str(key): value for key,value in self.sector_state.items()}
         }
+        return json_dict
 
     @classmethod
     def from_json(cls, d, self=None):
@@ -213,5 +214,10 @@ class GridState:
             self = cls.__new__(cls, Space.from_json(d['space']), d['detection_radius'])
             self.sector_state = new_sector_state
             self.origin = Point.from_json(d['origin'])
+            self.detection_radius = int(d['detection_radius'])
+            self.y_count = int(d['y_count'])
+            self.x_count = int(d['x_count'])
+            self.sector_height = int(d['sector_height'])
+            self.sector_width = int(d['sector_width'])
 
         return self
