@@ -5,8 +5,8 @@ from lxml import etree
 from io import StringIO
 from c2gui.models import Pinor
 from c2gui.views import save_new_pinor
-from decimal import Decimal
 from io import BytesIO
+from decimal import *
 
 
 def get_updates_from_ext_c2s(url, clear_table=False):
@@ -68,9 +68,10 @@ def _get_pinors_from_xml(xml):
         if gis.get_value().get_extensiontype_() == "strandedPerson" \
                 and gis.get_position().get_extensiontype_() == "point":
             time_stamp = gis.get_timestamp().get_date()
+            getcontext().prec = 6
             pinor_list.append(pinor(
-                Decimal(gis.get_position().get_position().get_latitude()).quantize(Decimal("1.000000")),
-                Decimal(gis.get_position().get_position().get_longitude()).quantize(Decimal("1.000000")), time_stamp))
+                Decimal(gis.get_position().get_position().get_latitude()) + Decimal("0"),
+                Decimal(gis.get_position().get_position().get_longitude()) + Decimal("0"), time_stamp))
     return pinor_list
 
 
