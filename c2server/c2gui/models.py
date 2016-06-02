@@ -25,7 +25,7 @@ class Event(models.Model):
     )
 
     event_type = models.CharField(max_length=3, choices=EVENT_TYPES)
-    headline = models.CharField(max_length=25)
+    headline = models.CharField(max_length=40)
     text = models.CharField(max_length=150)
     timestamp = models.DateTimeField(auto_now_add=True)
     pinor = models.ForeignKey('Pinor', on_delete=models.CASCADE, blank=True, null=True)
