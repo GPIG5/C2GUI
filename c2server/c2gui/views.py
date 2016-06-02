@@ -66,7 +66,7 @@ def send_search_coord(request):
     bottomleft = Point(latitude=bottomleftlat, longitude=bottomleftlon, altitude=0)
     topright = Point(latitude=toprightlat, longitude=toprightlon, altitude=0)
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
-    c = Communicator()`
+    c = Communicator()
     c.send(mes)
     return HttpResponse(simplejson.dumps({"regions": region_serializer.data, "headline": new_event.headline, "text": new_event.text,
                                           "timestamp": {"year": new_event.timestamp.year,
