@@ -27,7 +27,6 @@ def get_ext_c2_data():
     from c2ext.c2_data import get_updates_from_ext_c2s
     with open("ext_c2_addr.txt", "r") as file:
         urls = file.read().splitlines()
-    pinor_list = []
     for url in urls:
         get_updates_from_ext_c2s(url)
 

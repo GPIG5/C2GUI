@@ -198,7 +198,7 @@ def save_new_pinor(lat, lon, timestamp, origin='M'):
     return new_pinor
 
 def retrieve_new_data(request):
-    #utils.get_ext_c2_data()
+    utils.get_ext_c2_data()
     new_events = Event.objects.filter(is_new=True)
     event_serializer = EventSerializer(new_events, many=True)
     new_event_list = event_serializer.data
@@ -225,17 +225,6 @@ def clear_data(request):
     new_event = Event(event_type='SS', headline="Started the server", text="")
     new_event.save()
     return HttpResponseRedirect("/c2gui/")
-
-def get_ext_c2_data(request):
-    from c2ext.c2_data import get_updates_from_ext_c2s
-    with open("ext_c2_addr.txt", "r") as file:
-        urls = file.read().splitlines()
-    pinor_list = []
-    for url in urls:
-        pinors = get_updates_from_ext_c2s(url)
-        if pinors:
-            pinor_list += pinors
-    return HttpResponse(pinor_list)
 
 def test_data_fill(request):
     from c2ext.c2_data import _get_pinors_from_xml, _update_db
