@@ -56,11 +56,11 @@ function initialize() {
         for (let region of regionStatuses) {
           var regionOptions = {"strokeWeight": 0, "fillOpacity": 0};
           if (region.status === 'DD') {
-            regionOptions = {"fillColor": "yellow", "strokeWeight": 0};
+            regionOptions = {"fillColor": "yellow", "strokeWeight": 0, "fillOpacity": 0.3};
           } else if (region.status === 'NRE') {
-            regionOptions = {"fillColor": "#ff00ff", "strokeWeight": 0};
+            regionOptions = {"fillColor": "#ff00ff", "strokeWeight": 0, "fillOpacity": 0.3};
           } else if (region.status === 'RE') {
-            regionOptions = {"fillColor": "blue", "strokeWeight": 0};
+            regionOptions = {"fillColor": "blue", "strokeWeight": 0, "fillOpacity": 0.3};
           }
           if (region.status !== 'NE') {
             var rectangle = new google.maps.Rectangle({
@@ -73,7 +73,6 @@ function initialize() {
               },
               clickable: false,
               zIndex: SHAPE_Z_INDEX,
-              fillOpacity: 0.3
             });
             rectangle.setOptions(regionOptions);
             all_overlays[region.pk] = rectangle;
@@ -82,7 +81,7 @@ function initialize() {
         for (let pinor of pinors) {
           var imageStr = "";
           if (pinor.images.length > 0) {
-            imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '">';
+            imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '" style="max-width:480px">';
           }
           var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
           var contentString = '<div class="content">' +
@@ -163,11 +162,12 @@ $( document ).ready(function() {
                   }
               };
               timeline.add(ev);
+              //$(".tl-timenav-slider").css({"left": "350px"});
               if (new_event.pinor) {
                   var pinor = new_event.pinor;
                   var imageStr = "";
                   if (pinor.hasOwnProperty('images') && pinor.images.length > 0) {
-                    imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '">';
+                    imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '" style="max-width:480px">';
                   }
                   var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
                   var contentString = '<div class="content">' +
@@ -210,7 +210,7 @@ $( document ).ready(function() {
                         rectangle = all_overlays[region.pk];
                       }
                       if (region.status === 'NRE') {
-                        rectangle.setOptions({"fillColor": "#ff00ff", "strokeWeight": 0});
+                        rectangle.setOptions({"fillColor": "#ff00ff", "strokeWeight": 0, "fillOpacity": 0.3});
                       } else if (region.status === 'RE') {
                         rectangle.setOptions({"fillColor": "blue", "strokeWeight": 0, "fillOpacity": 0.3});
                       }
@@ -265,6 +265,7 @@ $( document ).ready(function() {
                }
              };
              timeline.add(new_event);
+             //$(".tl-timenav-slider").css({"left": "350px"});
              timeline.goToEnd();
              let regions = data.regions;
              deleteSelectedShape();

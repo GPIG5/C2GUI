@@ -78,7 +78,7 @@ def send_search_coord(request):
 
 def get_all_regions_status(request):
     Event.objects.update(is_new=False)
-    data = list(SearchArea.objects.values('id', 'status', 'lat', 'lon'))
+    data = list(SearchArea.objects.values('pk', 'status', 'lat', 'lon'))
     pinors = Pinor.objects.all()
     pinor_serializer = PinorSerializer(pinors, many=True)
    
@@ -140,9 +140,10 @@ def send_drone_data(request):
                 try:
                     pinor = save_new_pinor(lat, lon, datetime.datetime.utcfromtimestamp(float(row["timestamp"])).replace(tzinfo=pytz.utc))
                     if float(row["dist"]) < 80:
-                        img = Image.objects.get(photo= uuid + "/images/" + row["img"])
-                        img.pinor = pinor
-                        img.save()
+                        img = Image.objects.filter(photo= uuid + "/images/" + row["img"]).first()
+                        if img:
+                            img.pinor = pinor
+                            img.save()
 
                 except Image.DoesNotExist:
                     logging.debug("Image does not exist: " + row["img"])
