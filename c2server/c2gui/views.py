@@ -14,7 +14,7 @@ from . import utils
 from .communicator import Communicator
 from .utils import *
 from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer, RegionSerializer
-from .map_settings import REG_WIDTH, REG_HEIGHT
+from .map_settings import REG_WIDTH, REG_HEIGHT, C2_LOCATIONS
 from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, UploadDirect
 from .point import Point, Space
 from .datastore import SectorState
@@ -78,8 +78,7 @@ def get_all_regions_status(request):
     data = list(SearchArea.objects.values('pk', 'status', 'lat', 'lon'))
     pinors = Pinor.objects.all()
     pinor_serializer = PinorSerializer(pinors, many=True)
-   
-    return HttpResponse(simplejson.dumps({"statuses": data, "pinors": pinor_serializer.data, "width": REG_WIDTH, "height": REG_HEIGHT}), content_type='application/json')
+    return HttpResponse(simplejson.dumps({"statuses": data, "pinors": pinor_serializer.data, "width": REG_WIDTH, "height": REG_HEIGHT, "c2locations": C2_LOCATIONS}), content_type='application/json')
 
 @csrf_exempt
 def send_drone_data(request):

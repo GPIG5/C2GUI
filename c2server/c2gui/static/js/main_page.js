@@ -49,6 +49,15 @@ function initialize() {
       url: 'get_all_regions_status',
       data: {},
       success: function(data) {
+        let c2locations = data.c2locations;
+        for (let c2location of c2locations) {
+          var c2marker = new google.maps.Marker({
+          position: {lat: parseFloat(c2location.lat), lng: parseFloat(c2location.lon)},
+            map: map,
+            icon: "/static/img/c2base.png"
+          });
+        }
+        
         let regionStatuses = data.statuses;
         regHeight = parseFloat(data.height);
         regWidth = parseFloat(data.width);

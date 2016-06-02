@@ -35,7 +35,7 @@ def create_xml_for_ext_c2():
     """
     :return: xml data in string format
     """
-    pinor_list = Pinor.objects.all().values("lat", "lon", "timestamp")
+    pinor_list = Pinor.objects.filter(origin="M").values("lat", "lon", "timestamp")
     xml = _create_xml(pinor_list)
     out = StringIO()
     xml.export(out, 0)

@@ -8,3 +8,5 @@ REG_NUM_X = 40    # number of tiles in x axis
 REG_NUM_Y = 32     # number of tiles in y axis
 REG_WIDTH = (MAX_LON - MIN_LON) / REG_NUM_X
 REG_HEIGHT = (MAX_LAT - MIN_LAT) / REG_NUM_Y
+
+C2_LOCATIONS = [{"lat": 53.966184, "lon": -1.072711}]
