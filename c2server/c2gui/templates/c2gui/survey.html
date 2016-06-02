@@ -82,8 +82,8 @@ rvcam = 80m
 
   function draw_survey(c, ctx, image) {
     // image width and height in metres
-    var iwidth = 38.4 * 6.5;
-    var iheight = 28.8 * 6.5;
+    var iwidth = 640 * 0.15;
+    var iheight = 480 * 0.15;
     // Co-ordiantes of bottom left of terrain.
     var xll = 454920
     var yll = 448470
@@ -106,29 +106,7 @@ rvcam = 80m
       //console.log(ydist);
     };
     im.src = image.photo;
-
-    
-
-    /*
-    var bl = geod.Direct(image.lat, image.lon, 225, 24);
-    var bllat = bl.lat2.toFixed(8);
-    var bllon = bl.lon2.toFixed(8);
-    var blmap = geod.Inverse(53.929472, -1.165084, bllat, bllon);
-    var dist = blmap.s12.toFixed(8);
-    var bearing = blmap.azi1.toFixed(8);
-    var xdist = Math.abs((dist * Math.sin(0.01745329252 * bearing)) / 10412) * c.width;
-    var ydist = Math.abs((dist * Math.cos(0.01745329252 * bearing)) / 8774) * c.height;
-    var xsize = 6.5 * (38.4 / 10412) * c.width;
-    var ysize = 6.5 * (28.8 / 8774) * c.height;
-    var im = new Image;
-    im.onload = function() {
-      ctx.drawImage(im, xdist, c.height - ydist, xsize, ysize);
-      //console.log(xdist);
-      //console.log(ydist);
-    };
-    im.src = image.photo;
-    //console.log(image);
-  */}
+  }
 </script>
 </body>
 </html>
