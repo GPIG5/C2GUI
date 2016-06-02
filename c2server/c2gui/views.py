@@ -226,17 +226,6 @@ def clear_data(request):
     new_event.save()
     return HttpResponseRedirect("/c2gui/")
 
-def get_ext_c2_data(request):
-    from c2ext.c2_data import get_updates_from_ext_c2s
-    with open("ext_c2_addr.txt", "r") as file:
-        urls = file.read().splitlines()
-    pinor_list = []
-    for url in urls:
-        pinors = get_updates_from_ext_c2s(url)
-        if pinors:
-            pinor_list += pinors
-    return HttpResponse(pinor_list)
-
 def test_data_fill(request):
     from c2ext.c2_data import _get_pinors_from_xml, _update_db
     import c2ext.schema as schema
