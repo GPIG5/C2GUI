@@ -96,28 +96,6 @@ def send_drone_data(request):
             lon = Decimal(pinor.longitude) + Decimal(0)
             time_stamp = datetime.datetime.utcfromtimestamp(decoded_message.timestamp).replace(tzinfo=pytz.utc)
             save_new_pinor(lat, lon, time_stamp, "M")
-    elif json_message["data"]["datatype"] == "status":
-        decoded_message = StatusMesh.from_json(json_message)
-        drone, created = Drone.objects.update_or_create(uid=decoded_message.uuid,
-                                                        defaults={"lat": decoded_message.location.latitude,
-                                                                  "lon": decoded_message.location.longitude})
-    elif json_message["data"]["datatype"] == "complete":
-        decoded_message = CompleteMesh.from_json(json_message)
-        bottomleftlat = Decimal(decoded_message.space.bottom_left["lat"])
-        bottomleftlon = Decimal(decoded_message.space.bottom_left["lon"])
-        toprightlat = Decimal(decoded_message.space.top_right["lat"])
-        toprightlon = Decimal(decoded_message.space.top_right["lon"])
-        areasComplete = SearchArea.objects.exclude(
-            Q(lat__gt=toprightlat) | Q(lat__lt=bottomleftlat - REG_HEIGHT)
-        ).exclude(Q(lon__gt=toprightlon) | Q(lon__lt=bottomleftlon - REG_WIDTH)
-                  )
-        areasComplete.update(status='NRE')
-        new_event = Event(event_type='CS', headline="Completed search",
-                          text="Completed search at the area (%f N, %f W):(%f N, %f W)" % (
-                          bottomleftlat, -bottomleftlon, toprightlat, -toprightlon,))
-        new_event.save()
-        new_event.regions.add(*list(areasComplete))
-
     elif json_message["data"]["datatype"] == "upload":
         decoded_message = UploadDirect.from_json(json_message)
         uuid = decoded_message.uuid
@@ -133,20 +111,42 @@ def send_drone_data(request):
 
         with open('/tmp/' + uuid + '/pinor.csv') as csvfile:
             pinor_reader = csv.DictReader(csvfile)
+            i = 0
             for row in pinor_reader:
                 getcontext().prec = 6
+                if i==0:
+                    prev_lat = Decimal(row["lat"]) + Decimal(0)
+                    prev_lon = Decimal(row["lon"]) + Decimal(0)
+                    min_distance = Decimal(row["dist"]) + Decimal(0)
+                    photo_id = uuid + "/images/" + row["img"]
+                    timestamp = float(row["timestamp"])
+                i = i + 1
                 lat = Decimal(row["lat"]) + Decimal(0)
                 lon = Decimal(row["lon"]) + Decimal(0)
-                try:
-                    pinor = save_new_pinor(lat, lon, datetime.datetime.utcfromtimestamp(float(row["timestamp"])).replace(tzinfo=pytz.utc))
-                    if float(row["dist"]) < 80:
-                        img = Image.objects.filter(photo= uuid + "/images/" + row["img"]).first()
-                        if img:
-                            img.pinor = pinor
-                            img.save()
+                distance = Decimal(row["dist"]) + Decimal(0)
+                if (lat == prev_lat and lon == prev_lon):
+                    if distance < min_distance:
+                        min_distance = distance
+                        photo_id = uuid + "/images/" + row["img"]
+                        timestamp = float(row["timestamp"])
+                else:
+                    pinor = save_new_pinor(prev_lat, prev_lon, datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.utc))
+                    img = Image.objects.filter(photo=photo_id).first()
+                    if img:
+                        img.pinor = pinor
+                        img.save()
+                    min_distance = Decimal(row["dist"]) + Decimal(0)
+                    photo_id = uuid + "/images/" + row["img"]
+                    timestamp = float(row["timestamp"])
+                prev_lat = lat
+                prev_lon = lon
+            if i>0:
+                pinor = save_new_pinor(prev_lat, prev_lon, datetime.datetime.utcfromtimestamp(timestamp).replace(tzinfo=pytz.utc))
+                img = Image.objects.filter(photo=photo_id).first()
+                if img:
+                    img.pinor = pinor
+                    img.save()
 
-                except Image.DoesNotExist:
-                    logging.debug("Image does not exist: " + row["img"])
 
         if decoded_message.grid_state:
             for pos, state in decoded_message.grid_state.sector_state.items():
@@ -201,7 +201,7 @@ def save_new_pinor(lat, lon, timestamp, origin='M'):
     return new_pinor
 
 def retrieve_new_data(request):
-    #utils.get_ext_c2_data()
+    utils.get_ext_c2_data()
     new_events = Event.objects.filter(is_new=True)
     event_serializer = EventSerializer(new_events, many=True)
     new_event_list = event_serializer.data
@@ -234,17 +234,6 @@ def clear_data(request):
     new_event = Event(event_type='SS', headline="Started the server", text="")
     new_event.save()
     return HttpResponseRedirect("/c2gui/")
-
-def get_ext_c2_data(request):
-    from c2ext.c2_data import get_updates_from_ext_c2s
-    with open("ext_c2_addr.txt", "r") as file:
-        urls = file.read().splitlines()
-    pinor_list = []
-    for url in urls:
-        pinors = get_updates_from_ext_c2s(url)
-        if pinors:
-            pinor_list += pinors
-    return HttpResponse(pinor_list)
 
 def test_data_fill(request):
     from c2ext.c2_data import _get_pinors_from_xml, _update_db
