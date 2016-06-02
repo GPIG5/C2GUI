@@ -13,8 +13,9 @@ from django.core.urlresolvers import reverse
 from . import utils
 from .communicator import Communicator
 from .utils import *
-from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer, RegionSerializer
+from .models import SearchArea, Event, Pinor, Drone, Image, EventSerializer, DroneSerializer, PinorSerializer, RegionSerializer, ImageSerializer
 from .map_settings import REG_WIDTH, REG_HEIGHT, C2_LOCATIONS
+
 from .messages import DeployMesh, PinorMesh, MeshMessage, Message, StatusMesh, UploadDirect
 from .point import Point, Space
 from .datastore import SectorState
@@ -35,6 +36,9 @@ getcontext().prec = 6
 def index(request):
     events = Event.objects.all()
     return render(request, 'c2gui/index.html', {"event_list": events})
+
+def survey(request):
+    return render(request, 'c2gui/survey.html', {})
 
 def send_search_coord(request):
     bottomleftlat = Decimal(request.POST['bottomleftlat'])
@@ -62,7 +66,7 @@ def send_search_coord(request):
     bottomleft = Point(latitude=bottomleftlat, longitude=bottomleftlon, altitude=0)
     topright = Point(latitude=toprightlat, longitude=toprightlon, altitude=0)
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
-    c = Communicator()
+    c = Communicator()`
     c.send(mes)
     return HttpResponse(simplejson.dumps({"regions": region_serializer.data, "headline": new_event.headline, "text": new_event.text,
                                           "timestamp": {"year": new_event.timestamp.year,
@@ -203,6 +207,12 @@ def retrieve_new_data(request):
     new_event_list = event_serializer.data
     new_events.update(is_new=False)
     return HttpResponse(simplejson.dumps({"new_events": new_event_list, "height": REG_HEIGHT, "width": REG_WIDTH}), content_type='application/json')
+
+def retrieve_survey(request):
+    images = Image.objects.all()
+    image_serializer = ImageSerializer(images, many=True)
+    image_data = image_serializer.data
+    return HttpResponse(simplejson.dumps({'data':image_data}), content_type='application/json')
 
 def send_c2_data(request):
     from c2ext.c2_data import create_xml_for_ext_c2

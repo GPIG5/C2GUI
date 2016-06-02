@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load staticfiles %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <link href='https://fonts.googleapis.com/css?family=Playfair+Display:700,900|Fira+Sans:400,400italic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/survey.css' %}"/> -->
+    <script type="text/javascript"
+        src="http://geographiclib.sourceforge.net/scripts/geographiclib.min.js">
+    </script>
+    <script language="javascript" src="http://www.nearby.org.uk/tests/geotools2.js"></script>
+    <script src="{% static 'js/jquery-2.1.4.js' %}"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+    <title>C2 GUI - Survey Map</title>
+</head>
+
+<body>
+  <canvas id="survey-map" width="1000px", height="842px">
+  </canvas>
+<script src="{% static 'js/jquery.mobile.custom.min.js' %}"></script>
+
+<script type="text/javascript">
+  //var GeographicLib = require("geographiclib");
+  var Geodesic = GeographicLib.Geodesic;
+  var DMS = GeographicLib.DMS;
+  var geod = Geodesic.WGS84;
+  $(document).ready(function () {
+    var c = document.getElementById("survey-map");
+    var ctx = c.getContext("2d");
+    var bg = new Image;
+    bg.onload = function () {
+      ctx.drawImage(bg, 0, 0, c.width, c.height);
+      // Now filter this.
+      brightness(c, ctx, 0.5);
+    };
+    bg.src = "{% static 'img/yorktex.jpg' %}";
+    // Do XHR requests to get images to draw.
+    var seen = {};
+    window.setInterval(function() {
+      $.ajax({
+        url: "retrieve_survey",
+        dataType: "json",
+        context: document.body
+      }).done(function(data) {
+        data['data'].forEach(function(item) {
+          if (!seen[item.photo]) {
+            draw_survey(c, ctx, item);
+            seen[item.photo] = true;
+          }
+        });
+      });
+    }, 3000);
+  });
+
+
+  function brightness(c, ctx, perc) {
+    var pixels = ctx.getImageData(0, 0, c.width, c.height);
+    var d = pixels.data;
+    for (var i = 0; i < d.length; i += 4) {
+      d[i    ] *= perc;
+      d[i + 1] *= perc;
+      d[i + 2] *= perc;
+    }
+    ctx.putImageData(pixels, 0, 0);
+  }
+
+
+/*
+alt = 80m
+hangle = 90
+hcam = 640
+tan hangle = rhcam/alt
+vangle = 50
+vcam = 480
+tan vangle = rvcam/alt
+rhcam = 170m
+rvcam = 80m
+
+*/
+
+  function draw_survey(c, ctx, image) {
+    // image width and height in metres
+    var scale = 50.0;
+    var iwidth = 4 * scale;
+    var iheight = 3 * scale;
+
+    // Co-ordiantes of bottom left of terrain.
+    var xll = 454920;
+    var yll = 448470;
+
+    var wgs84 = new GT_WGS84();
+    wgs84.setDegrees(image.lat, image.lon);
+    var osgb = wgs84.getOSGB();
+
+    var eastings = osgb.eastings - (iwidth/2) - xll;
+    var northings = osgb.northings - (iheight/2) - yll;
+
+    northings += iheight;
+
+    var xloc = (eastings / 10412) * c.width;
+    var yloc = (northings / 8774) * c.height;
+    yloc = c.height - yloc;
+
+    var im = new Image;
+    im.onload = function() {
+      ctx.drawImage(im, xloc, yloc, (iwidth / 10412) * c.width, (iheight / 8774) * c.height);
+      //console.log(xdist);
+      //console.log(ydist);
+    };
+    im.src = image.photo;
+  }
+</script>
+</body>
+</html>
+
+
+
+
