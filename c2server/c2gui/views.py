@@ -35,7 +35,9 @@ getcontext().prec = 6
 
 def index(request):
     events = Event.objects.all()
-    return render(request, 'c2gui/index.html', {"event_list": events})
+    last_event = Event.objects.all().last()
+    #logging.debug(event_serializer.data)
+    return render(request, 'c2gui/index.html', {"existingEvents": events, "last_event": last_event})
 
 def survey(request):
     return render(request, 'c2gui/survey.html', {})
@@ -68,7 +70,7 @@ def send_search_coord(request):
     mes = DeployMesh("c2", "c2", Space(bottomleft, topright))
     c = Communicator()
     c.send(mes)
-    return HttpResponse(simplejson.dumps({"regions": region_serializer.data, "headline": new_event.headline, "text": new_event.text,
+    return HttpResponse(simplejson.dumps({"event_id": new_event.pk, "regions": region_serializer.data, "headline": new_event.headline, "text": new_event.text,
                                           "timestamp": {"year": new_event.timestamp.year,
                                                         "month": new_event.timestamp.month,
                                                         "day": new_event.timestamp.day,
@@ -200,9 +202,9 @@ def save_new_pinor(lat, lon, timestamp, origin='M'):
         new_event.regions.add(region)
     return new_pinor
 
-def retrieve_new_data(request):
+def retrieve_new_data(request, event_id):
     utils.get_ext_c2_data()
-    new_events = Event.objects.filter(is_new=True)
+    new_events = Event.objects.filter(pk__gt=event_id)
     event_serializer = EventSerializer(new_events, many=True)
     new_event_list = event_serializer.data
     new_events.update(is_new=False)

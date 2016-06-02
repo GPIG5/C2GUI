@@ -14,7 +14,7 @@ name='get_all_regions_status'),
     url(r'^send_drone_data$', views.send_drone_data, name='send_drone_data'),
     url(r'^send_c2_data$', views.send_c2_data, name='send_c2_data'),
     url(r'^test_data_fill$', views.test_data_fill, name='test_data_fill'),
-    url(r'^retrieve_new_data$', views.retrieve_new_data, name='retrieve_new_data'),
+    url(r'^retrieve_new_data/([0-9]+)$', views.retrieve_new_data, name='retrieve_new_data'),
     url(r'^clear_data$', views.clear_data, name='clear_data'),
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

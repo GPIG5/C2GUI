@@ -3,6 +3,7 @@
 <script src="{% static 'timeline/js/timeline.js' %}"></script>
 <script type="text/javascript">
 var timeline;
+var lastDroneEvent;
 $(document).ready(function() {
 
 var timeline_json = {
@@ -10,21 +11,22 @@ var timeline_json = {
 };
              
 var createTimeline = function () {
-    {% for event in event_list %}
+    {% for droneEvent in existingEvents %}
+        var milSeconds = Math.floor({{ droneEvent.timestamp.microsecond }} / 1000);
         var new_event = {
             "start_date": {
-                "year": "{{ event.timestamp|date:'Y' }}",
-                "month": "{{ event.timestamp|date:'m' }}",
-                "day": "{{ event.timestamp|date:'d' }}",
-                "hour": "{{ event.timestamp|date:'G' }}",
-                "minute": "{{ event.timestamp|date:'i' }}",
-                "second": "",
-                "millisecond": "",
+                "year": "{{ droneEvent.timestamp|date:'Y' }}",
+                "month": "{{ droneEvent.timestamp|date:'m' }}",
+                "day": "{{ droneEvent.timestamp|date:'d' }}",
+                "hour": "{{ droneEvent.timestamp|date:'G' }}",
+                "minute": "{{ droneEvent.timestamp|date:'i' }}",
+                "second": "{{ droneEvent.timestamp|date:'s' }}",
+                "millisecond": milSeconds.toString(),
                 "format": ""
             },
             "text": {
-                "headline": "{{ event.headline }}",
-                "text": "{{ event.text }}"
+                "headline": "{{ droneEvent.headline }}",
+                "text": "{{ droneEvent.text }}"
             }
         }
         timeline_json.events.push(new_event);
@@ -32,6 +34,7 @@ var createTimeline = function () {
 }
 
     createTimeline();
+    lastDroneEvent = {{ last_event.id }};
     timeline = new TL.Timeline('timeline', timeline_json);
     timeline.goToEnd();
     

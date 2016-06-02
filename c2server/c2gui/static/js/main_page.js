@@ -20,6 +20,106 @@ function deleteSelectedShape() {
   }
 }
 
+function periodic_worker() {
+  $.ajax({
+    url: 'retrieve_new_data/' + lastDroneEvent,
+    success: function(data) {
+      let new_events = data.new_events;
+      if (new_events.length > 0) {
+        lastDroneEvent = new_events[new_events.length-1].pk;
+      }
+      for (let new_event of new_events) {
+        event_date = new Date(new_event.timestamp);
+        var ev = {
+          "start_date": {
+            "year": event_date.getUTCFullYear(),
+            "month": event_date.getUTCMonth() + 1,
+            "day": event_date.getUTCDate(),
+            "hour": event_date.getUTCHours(),
+            "minute": event_date.getUTCMinutes(),
+            "second": event_date.getUTCSeconds(),
+            "millisecond": event_date.getUTCMilliseconds(),
+            "format": ""
+          },
+          "text": {
+            "headline": new_event.headline,
+            "text": new_event.text
+          }
+        };
+        timeline.add(ev);
+        if (new_event.pinor) {
+          var pinor = new_event.pinor;
+          var imageStr = "";
+          if (pinor.hasOwnProperty('images') && pinor.images.length > 0) {
+            imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '" style="max-width:480px">';
+          }
+          var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
+          var contentString = '<div class="content">' +
+                    'Detected on ' + timeString +
+                    ' at the location (' + pinor.lat + ' N, ' +
+                    (-pinor.lon) + ' W).' +
+                    imageStr +
+                    '</div>';
+          var marker = new google.maps.Marker({
+            position: {lat: parseFloat(new_event.pinor.lat), lng: parseFloat(new_event.pinor.lon)},
+            title: 'Person in Need',
+            clickable: true,
+            animation: google.maps.Animation.DROP,
+            html: contentString
+          });
+          if (pinor.origin === "O") {
+            marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+          }
+          marker.setMap(map);
+          markers.push(marker);
+        }
+        if (new_event.regions.length > 0) {
+          for (let region of new_event.regions) {
+            var rectangle;
+            if (!all_overlays.hasOwnProperty(region.pk)) {
+              rectangle = new google.maps.Rectangle({
+                          map: map,
+                          bounds: {
+                            north: parseFloat(region.lat) + regHeight,
+                            south: parseFloat(region.lat),
+                            east: parseFloat(region.lon) + regWidth,
+                            west: parseFloat(region.lon)
+                          },
+                          clickable: false,
+                          zIndex: SHAPE_Z_INDEX
+              });
+              all_overlays[region.pk] = rectangle;
+            } else {
+              rectangle = all_overlays[region.pk];
+            }
+            if (region.status === 'NRE') {
+              rectangle.setOptions({"fillColor": "#ff00ff", "strokeWeight": 0, "fillOpacity": 0.3});
+            } else if (region.status === 'RE') {
+              rectangle.setOptions({"fillColor": "blue", "strokeWeight": 0, "fillOpacity": 0.3});
+            }
+                    
+          }
+        }
+      }
+      for (var i = lastMarker; i < markers.length; i++) {
+        var marker = markers[i];
+        google.maps.event.addListener(marker, 'click', function() {
+          infowindow.setContent(this.html);
+          infowindow.open(map, this);
+        });
+      }
+
+      if (new_events.length > 0){
+        timeline.goToEnd();
+      }
+    },
+    complete: function() {
+      // Schedule the next request when the current one is complete
+      setTimeout(periodic_worker, 1000);    
+    }
+  });
+}
+
 function initialize() {
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 13,
@@ -139,113 +239,12 @@ function initialize() {
       deleteSelectedShape();
     }
   });
+  periodic_worker();
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
 
 $( document ).ready(function() {
-    (function periodic_worker() {
-      $.ajax({
-        url: 'retrieve_new_data',
-        success: function(data) {
-          let new_events = data.new_events;
-          //let regHeight = data.height;
-          //let regWidth = data.width;
-
-          for (let new_event of new_events) {
-              event_date = new Date(new_event.timestamp);
-              var ev = {
-                  "start_date": {
-                      "year": event_date.getUTCFullYear(),
-                      "month": event_date.getUTCMonth() + 1,
-                      "day": event_date.getUTCDate(),
-                      "hour": event_date.getUTCHours(),
-                      "minute": event_date.getUTCMinutes(),
-                      "second": event_date.getUTCSeconds(),
-                      "millisecond": "",
-                      "format": ""
-                  },
-                  "text": {
-                      "headline": new_event.headline,
-                      "text": new_event.text
-                  }
-              };
-              timeline.add(ev);
-              //$(".tl-timenav-slider").css({"left": "350px"});
-              if (new_event.pinor) {
-                  var pinor = new_event.pinor;
-                  var imageStr = "";
-                  if (pinor.hasOwnProperty('images') && pinor.images.length > 0) {
-                    imageStr = '<br><img src="/c2gui' + pinor.images[0].photo + '" style="max-width:480px">';
-                  }
-                  var timeString = new Date(pinor.timestamp).toLocaleTimeString("en-uk", dateTimeOptions);
-                  var contentString = '<div class="content">' +
-                    'Detected on ' + timeString +
-                    ' at the location (' + pinor.lat + ' N, ' +
-                    (-pinor.lon) + ' W).' +
-                    imageStr +
-                    '</div>';
-                  var marker = new google.maps.Marker({
-                      position: {lat: parseFloat(new_event.pinor.lat), lng: parseFloat(new_event.pinor.lon)},
-                      title: 'Person in Need',
-                      clickable: true,
-                      animation: google.maps.Animation.DROP,
-                      html: contentString
-                  });
-                  if (pinor.origin === "O") {
-                    marker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
-                  }
-                  marker.setMap(map);
-                  markers.push(marker);
-              }
-              console.log(new_event);
-              if (new_event.regions.length > 0) {
-                  for (let region of new_event.regions) {
-                      var rectangle;
-                      if (!all_overlays.hasOwnProperty(region.pk)) {
-                        rectangle = new google.maps.Rectangle({
-                          map: map,
-                          bounds: {
-                            north: parseFloat(region.lat) + regHeight,
-                            south: parseFloat(region.lat),
-                            east: parseFloat(region.lon) + regWidth,
-                            west: parseFloat(region.lon)
-                          },
-                          clickable: false,
-                          zIndex: SHAPE_Z_INDEX
-                        });
-                        all_overlays[region.pk] = rectangle;
-                      } else {
-                        rectangle = all_overlays[region.pk];
-                      }
-                      if (region.status === 'NRE') {
-                        rectangle.setOptions({"fillColor": "#ff00ff", "strokeWeight": 0, "fillOpacity": 0.3});
-                      } else if (region.status === 'RE') {
-                        rectangle.setOptions({"fillColor": "blue", "strokeWeight": 0, "fillOpacity": 0.3});
-                      }
-                    
-                  }
-              }
-          }
-          for (var i = lastMarker; i < markers.length; i++) {
-            var marker = markers[i];
-            google.maps.event.addListener(marker, 'click', function() {
-              infowindow.setContent(this.html);
-              infowindow.open(map, this);
-            });
-          }
-
-          if (new_events.length > 0){
-              timeline.goToEnd();
-          }
-        },
-        complete: function() {
-          // Schedule the next request when the current one is complete
-          setTimeout(periodic_worker, 1000);    
-        }
-      });
-    })();
-
     $(document).on('submit', '#coordForm', function(e)
     {
         e.preventDefault();
@@ -256,7 +255,7 @@ $( document ).ready(function() {
           url : 'send_search_coord',
           data : str,
           success : function(data) {
-             console.log(data);
+             lastDroneEvent = data.event_id;
              new_event = {
                "start_date": {
                  "year": data.timestamp.year,
@@ -265,7 +264,7 @@ $( document ).ready(function() {
                  "hour": data.timestamp.hour,
                  "minute": data.timestamp.minute,
                  "second": data.timestamp.second,
-                 "millisecond": "",
+                 "millisecond": Math.floor(data.timestamp.microsecond / 1000),
                  "format": ""
                },
                "text": {
